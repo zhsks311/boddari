@@ -1,5 +1,5 @@
 package joyyir.boddari.domain;
 
 public enum MarketType {
-    KRW_XRP, BTC_USDT
+    XRP_KRW, XRP_USDT, USDT_KRW
 }

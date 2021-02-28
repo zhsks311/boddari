@@ -19,8 +19,8 @@ public class HuobiPriceRepository implements PriceRepository {
     @Override
     public BigDecimal getCurrentPrice(MarketType marketType) {
         String marketTypeString;
-        if (MarketType.BTC_USDT.equals(marketType)) {
-            marketTypeString = "btcusdt";
+        if (MarketType.XRP_USDT.equals(marketType)) {
+            marketTypeString = "xrpusdt";
         } else {
             throw new UnsupportedOperationException("unsupported for marketType: " + marketType.name());
         }
