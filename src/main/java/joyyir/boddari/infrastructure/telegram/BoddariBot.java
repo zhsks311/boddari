@@ -22,7 +22,7 @@ public class BoddariBot {
         this.chatId = chatId;
     }
 
-    public void send(String message) {
+    public void sendMessage(String message) {
         HttpEntity<?> entity = new HttpEntity<>(Map.of("chat_id", chatId, "text", message));
         restTemplate.exchange("https://api.telegram.org/bot" + token + "/sendMessage", HttpMethod.POST, entity, String.class);
     }

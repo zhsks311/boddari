@@ -38,7 +38,7 @@ public class BoddariRunner implements ApplicationRunner {
                 + ", 김치 프리미엄: " + kimchiPremium + "%";
             log.info(info);
             if (kimchiPremium.compareTo(BigDecimal.valueOf(3L)) >= 0) {
-                boddariBot.send(info);
+                boddariBot.sendMessage(info);
             }
 
             Thread.sleep(1000 * 60); // 1분
