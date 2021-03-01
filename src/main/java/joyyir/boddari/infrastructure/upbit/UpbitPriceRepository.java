@@ -21,6 +21,10 @@ public class UpbitPriceRepository implements PriceRepository {
         String marketTypeString;
         if (MarketType.XRP_KRW.equals(marketType)) {
             marketTypeString = "KRW-XRP";
+        } else if (MarketType.ETH_KRW.equals(marketType)) {
+            marketTypeString = "KRW-ETH";
+        } else if (MarketType.BTC_KRW.equals(marketType)) {
+            marketTypeString = "KRW-BTC";
         } else {
             throw new UnsupportedOperationException("unsupported for marketType: " + marketType.name());
         }

@@ -21,6 +21,10 @@ public class HuobiPriceRepository implements PriceRepository {
         String marketTypeString;
         if (MarketType.XRP_USDT.equals(marketType)) {
             marketTypeString = "xrpusdt";
+        } else if (MarketType.ETH_USDT.equals(marketType)) {
+            marketTypeString = "ethusdt";
+        } else if (MarketType.BTC_USDT.equals(marketType)) {
+            marketTypeString = "btcusdt";
         } else {
             throw new UnsupportedOperationException("unsupported for marketType: " + marketType.name());
         }
