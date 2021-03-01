@@ -1,8 +1,8 @@
 package joyyir.boddari;
 
+import joyyir.boddari.domain.Bot;
 import joyyir.boddari.domain.MarketType;
 import joyyir.boddari.domain.PriceRepository;
-import joyyir.boddari.infrastructure.telegram.BoddariBot;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -19,7 +19,7 @@ public class BoddariRunner implements ApplicationRunner {
     private final PriceRepository upbitPriceRepository;
     private final PriceRepository huobiPriceRepository;
     private final PriceRepository cobakPriceRepository;
-    private final BoddariBot boddariBot;
+    private final Bot boddariBot;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {

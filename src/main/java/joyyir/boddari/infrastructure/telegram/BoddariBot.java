@@ -1,5 +1,6 @@
 package joyyir.boddari.infrastructure.telegram;
 
+import joyyir.boddari.domain.Bot;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -9,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 @Repository
-public class BoddariBot {
+public class BoddariBot implements Bot {
     private final RestTemplate restTemplate;
     private final String token;
     private final String chatId;
