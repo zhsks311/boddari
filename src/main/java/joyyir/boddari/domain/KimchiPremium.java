@@ -2,6 +2,7 @@ package joyyir.boddari.domain;
 
 import lombok.Getter;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -18,6 +19,7 @@ public class KimchiPremium {
     @Id
     @GeneratedValue
     private Long id;
+    @Column(name = "timestamp", columnDefinition = "TIMESTAMP")
     private LocalDateTime timestamp;
     @Enumerated(value = EnumType.STRING)
     private CurrencyType currency;
