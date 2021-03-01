@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity
-@Table(name = "kimchi_premium", indexes = @Index(name = "kimchi_premium_currency_timestamp_index", columnList = "currency, timestamp"))
+@Table(name = "kimchi_premium", indexes = @Index(name = "kimchi_premium_timestamp_index", columnList = "timestamp"))
 public class KimchiPremium {
     @Id
     @GeneratedValue
