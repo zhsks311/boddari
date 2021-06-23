@@ -1,5 +1,7 @@
 package joyyir.boddari.interfaces.handler;
 
+import joyyir.boddari.domain.BotConfig;
+import joyyir.boddari.domain.BotConfigRepository;
 import joyyir.boddari.interfaces.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,9 +15,12 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 public class BoddariBotHandler extends TelegramLongPollingBot {
     private final String token;
+    private final BotConfigRepository botConfigRepository;
 
-    public BoddariBotHandler(@Value("${constant.telegram-boddaribot.access-token}") String token) {
+    public BoddariBotHandler(@Value("${constant.telegram-boddaribot.access-token}") String token,
+                             BotConfigRepository botConfigRepository) {
         this.token = token;
+        this.botConfigRepository = botConfigRepository;
     }
 
     @Override
@@ -25,24 +30,28 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        if (update.getMessage() == null) { // edited
+            return;
+        }
         final Long chatId = update.getMessage().getChatId();
-
         if (update.getMessage().isCommand()) {
             try {
                 String[] commands = update.getMessage().getText().split(" ");
                 switch (commands[0]) {
                     case "/start":
-                        sendMessage(chatId, "환영합니다!");
+                        commandStart(chatId);
                         break;
                     case "/volume":
-                        sendMessage(chatId, "거래량 기준을 바꿔볼까요?");
+                        commandVolume(chatId, commands);
                         break;
                     case "/price":
-                        sendMessage(chatId, "가격 기준을 바꿔볼까요?");
+                        commandPrice(chatId, commands);
                         break;
                     default:
                         throw new BadRequestException("잘못된 형식의 명령입니다. 명령어를 다시 확인해주세요.");
                 }
+            } catch (NumberFormatException e) {
+                sendMessage(chatId, "숫자 형식이 올바르지 않습니다.");
             } catch (BadRequestException e) {
                 sendMessage(chatId, e.getMessage());
             } catch (Exception e) {
@@ -50,6 +59,45 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
                 sendMessage(chatId, "예상치 못한 문제가 발생했습니다. 다시 시도해주세요.");
             }
         }
+    }
+
+    private void commandStart(Long chatId) {
+        sendMessage(chatId, "환영합니다!");
+        botConfigRepository.save(new BotConfig(chatId, 1.2, 100.0, 1.2, 100.0));
+    }
+
+    private void commandVolume(Long chatId, String[] commands) throws BadRequestException {
+        if (commands.length < 3) {
+            throw new BadRequestException("올바르지 않은 명령어입니다.\n(예시) /volume 1.2 5");
+        }
+        Double minVolumeMultiplier = Double.valueOf(commands[1]);
+        Double maxVolumeMultiplier = Double.valueOf(commands[2]);
+        if (minVolumeMultiplier > maxVolumeMultiplier) {
+            throw new BadRequestException("첫번째 수는 두번째 수보다 작아야합니다.");
+        }
+        BotConfig botConfig = botConfigRepository.findById(chatId)
+                                                 .orElseThrow(() -> new BadRequestException("등록되지 않은 chatId 입니다. /start 명령어로 시작하세요."));
+        botConfig.setMinVolumeMultiplier(minVolumeMultiplier);
+        botConfig.setMaxVolumeMultiplier(maxVolumeMultiplier);
+        botConfigRepository.save(botConfig);
+        sendMessage(chatId, String.format("거래량 기준을 %.2f배 이상 %.2f배 이하로 조정했습니다.", minVolumeMultiplier, maxVolumeMultiplier));
+    }
+
+    private void commandPrice(Long chatId, String[] commands) throws BadRequestException {
+        if (commands.length < 3) {
+            throw new BadRequestException("올바르지 않은 명령어입니다.\n(예시) /price 1.2 5");
+        }
+        Double minPriceMultiplier = Double.valueOf(commands[1]);
+        Double maxPriceMultiplier = Double.valueOf(commands[2]);
+        if (minPriceMultiplier > maxPriceMultiplier) {
+            throw new BadRequestException("첫번째 수는 두번째 수보다 작아야합니다.");
+        }
+        BotConfig botConfig = botConfigRepository.findById(chatId)
+                                                 .orElseThrow(() -> new BadRequestException("등록되지 않은 chatId 입니다. /start 명령어로 시작하세요."));
+        botConfig.setMinPriceMultiplier(minPriceMultiplier);
+        botConfig.setMaxPriceMultiplier(maxPriceMultiplier);
+        botConfigRepository.save(botConfig);
+        sendMessage(chatId, String.format("가격 기준을 %.2f배 이상 %.2f배 이하로 조정했습니다.", minPriceMultiplier, maxPriceMultiplier));
     }
 
     private void sendMessage(Long chatId, String message) {
