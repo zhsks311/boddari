@@ -8,7 +8,6 @@ import joyyir.boddari.domain.MarketType;
 import joyyir.boddari.domain.PriceRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -25,7 +24,7 @@ public class KimchiPremiumCheckScheduler {
     private final KimchiPremiumRepository kimchiPremiumRepository;
     private final Bot boddariBot;
 
-    @Scheduled(fixedRate = 1000 * 60)
+//    @Scheduled(fixedRate = 1000 * 60)
     void checkKimchiPremium() {
         check(MarketType.BTC_KRW, MarketType.BTC_USDT, CurrencyType.BTC);
         check(MarketType.ETH_KRW, MarketType.ETH_USDT, CurrencyType.ETH);
