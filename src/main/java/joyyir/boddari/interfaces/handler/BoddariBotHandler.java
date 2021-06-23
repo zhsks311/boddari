@@ -32,10 +32,14 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
                 String[] commands = update.getMessage().getText().split(" ");
                 switch (commands[0]) {
                     case "/start":
+                        sendMessage(chatId, "환영합니다!");
                         break;
                     case "/volume":
+                        sendMessage(chatId, "거래량 기준을 바꿔볼까요?");
                         break;
                     case "/price":
+                        sendMessage(chatId, "가격 기준을 바꿔볼까요?");
+                        break;
                     default:
                         throw new BadRequestException("잘못된 형식의 명령입니다. 명령어를 다시 확인해주세요.");
                 }
