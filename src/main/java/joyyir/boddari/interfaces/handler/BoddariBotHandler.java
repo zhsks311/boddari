@@ -2,25 +2,51 @@ package joyyir.boddari.interfaces.handler;
 
 import joyyir.boddari.domain.BotConfig;
 import joyyir.boddari.domain.BotConfigRepository;
+import joyyir.boddari.domain.CandleRepository;
+import joyyir.boddari.domain.DailyChange;
+import joyyir.boddari.domain.MarketType;
 import joyyir.boddari.interfaces.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
 @Slf4j
 @Component
 public class BoddariBotHandler extends TelegramLongPollingBot {
     private final String token;
     private final BotConfigRepository botConfigRepository;
+    private final CandleRepository candleRepository;
 
     public BoddariBotHandler(@Value("${constant.telegram-boddaribot.access-token}") String token,
-                             BotConfigRepository botConfigRepository) {
+                             BotConfigRepository botConfigRepository,
+                             CandleRepository upbitCandleRepository) {
         this.token = token;
         this.botConfigRepository = botConfigRepository;
+        this.candleRepository = upbitCandleRepository;
+    }
+
+    @Scheduled(cron = "0 1 9 * * *")
+    public void newDailyCandleScheduler() {
+        DailyChange dailyChange = candleRepository.findDailyChange(MarketType.BTC_KRW, LocalDateTime.now());
+        List<BotConfig> botConfigs = botConfigRepository.findAll();
+        for (BotConfig botConfig : botConfigs) {
+            String message = "🔔 " + dailyChange.getLocalDateTime().toLocalDate().format(DateTimeFormatter.ISO_DATE) + " 알람 🔔\n" +
+                             "- 마켓: " + dailyChange.getMarketType().name() + "\n" +
+                             "- 가격 변동: " + dailyChange.getDailyPriceChangeRate().multiply(new BigDecimal(100)).setScale(2, RoundingMode.HALF_UP) + "%\n" +
+                             "- 거래 변동: " + dailyChange.getDailyVolumeChangeRate().multiply(new BigDecimal(100)).setScale(2, RoundingMode.HALF_UP) + "%";
+            sendMessage(botConfig.getChatId(), message);
+        }
     }
 
     @Override
@@ -102,7 +128,7 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
 
     private void sendMessage(Long chatId, String message) {
         SendMessage sendMessage = new SendMessage();
-        sendMessage.enableMarkdown(true);
+        sendMessage.enableMarkdown(false);
         sendMessage.setChatId(String.valueOf(chatId));
         sendMessage.setText(message);
         try {
