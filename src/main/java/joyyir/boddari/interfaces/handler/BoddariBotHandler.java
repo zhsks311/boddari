@@ -44,7 +44,7 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
             String message = "🔔 " + dailyChange.getLocalDateTime().toLocalDate().format(DateTimeFormatter.ISO_DATE) + " 알람 🔔\n" +
                              "- 마켓: " + dailyChange.getMarketType().name() + "\n" +
                              "- 가격 변동: " + dailyChange.getDailyPriceChangeRate().multiply(new BigDecimal(100)).setScale(2, RoundingMode.HALF_UP) + "%\n" +
-                             "- 거래 변동: " + dailyChange.getDailyVolumeChangeRate().multiply(new BigDecimal(100)).setScale(2, RoundingMode.HALF_UP) + "%";
+                             "- 거래량 변동: " + dailyChange.getDailyVolumeChangeRate().multiply(new BigDecimal(100)).setScale(2, RoundingMode.HALF_UP) + "%";
             sendMessage(botConfig.getChatId(), message);
         }
     }
