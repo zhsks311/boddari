@@ -28,6 +28,7 @@ public class KimchiPremiumCheckScheduler {
         check(MarketType.BTC_USDT, MarketType.BTC_USDT, CurrencyType.BTC);
         check(MarketType.ETH_USDT, MarketType.ETH_USDT, CurrencyType.ETH);
         check(MarketType.XRP_USDT, MarketType.XRP_USDT, CurrencyType.XRP);
+        check(MarketType.ETC_USDT, MarketType.ETC_USDT, CurrencyType.ETC);
     }
 
     private void check(MarketType upbitMarketType, MarketType binanceMarketType, CurrencyType currency) {

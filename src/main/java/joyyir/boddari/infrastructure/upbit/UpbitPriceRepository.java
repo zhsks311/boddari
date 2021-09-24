@@ -23,7 +23,8 @@ public class UpbitPriceRepository implements PriceRepository {
 
         Map.entry(MarketType.BTC_USDT, "USDT-BTC"),
         Map.entry(MarketType.ETH_USDT, "USDT-ETH"),
-        Map.entry(MarketType.XRP_USDT, "USDT-XRP")
+        Map.entry(MarketType.XRP_USDT, "USDT-XRP"),
+        Map.entry(MarketType.ETC_USDT, "USDT-ETC")
     );
 
     @Override
