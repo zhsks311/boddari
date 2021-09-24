@@ -9,23 +9,27 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Objects;
 
 @Repository
 @AllArgsConstructor
 public class UpbitPriceRepository implements PriceRepository {
     private final RestTemplate restTemplate;
+    private final Map<MarketType, String> map = Map.ofEntries(
+        Map.entry(MarketType.BTC_KRW, "KRW-BTC"),
+        Map.entry(MarketType.ETH_KRW, "KRW-ETH"),
+        Map.entry(MarketType.XRP_KRW, "KRW-XRP"),
+
+        Map.entry(MarketType.BTC_USDT, "USDT-BTC"),
+        Map.entry(MarketType.ETH_USDT, "USDT-ETH"),
+        Map.entry(MarketType.XRP_USDT, "USDT-XRP")
+    );
 
     @Override
     public BigDecimal getCurrentPrice(MarketType marketType) {
-        String marketTypeString;
-        if (MarketType.XRP_KRW.equals(marketType)) {
-            marketTypeString = "KRW-XRP";
-        } else if (MarketType.ETH_KRW.equals(marketType)) {
-            marketTypeString = "KRW-ETH";
-        } else if (MarketType.BTC_KRW.equals(marketType)) {
-            marketTypeString = "KRW-BTC";
-        } else {
+        String marketTypeString = map.get(marketType);
+        if (marketTypeString == null) {
             throw new UnsupportedOperationException("unsupported for marketType: " + marketType.name());
         }
 

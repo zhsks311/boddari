@@ -19,30 +19,27 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class KimchiPremiumCheckScheduler {
     private final PriceRepository upbitPriceRepository;
-    private final PriceRepository huobiPriceRepository;
-    private final PriceRepository cobakPriceRepository;
+    private final PriceRepository binancePriceRepository;
     private final KimchiPremiumRepository kimchiPremiumRepository;
     private final Bot boddariBot;
 
 //    @Scheduled(fixedRate = 1000 * 60)
     void checkKimchiPremium() {
-        check(MarketType.BTC_KRW, MarketType.BTC_USDT, CurrencyType.BTC);
-        check(MarketType.ETH_KRW, MarketType.ETH_USDT, CurrencyType.ETH);
-        check(MarketType.XRP_KRW, MarketType.XRP_USDT, CurrencyType.XRP);
+        check(MarketType.BTC_USDT, MarketType.BTC_USDT, CurrencyType.BTC);
+        check(MarketType.ETH_USDT, MarketType.ETH_USDT, CurrencyType.ETH);
+        check(MarketType.XRP_USDT, MarketType.XRP_USDT, CurrencyType.XRP);
     }
 
-    private void check(MarketType upbitMarketType, MarketType huobiMarketType, CurrencyType currency) {
-        BigDecimal upbitXrpPriceByKrw = upbitPriceRepository.getCurrentPrice(upbitMarketType);
-        BigDecimal huobiXrpPriceByUsdt = huobiPriceRepository.getCurrentPrice(huobiMarketType);
-        BigDecimal usdtPriceByKrw = cobakPriceRepository.getCurrentPrice(MarketType.USDT_KRW);
-        BigDecimal huobiXrpPriceByKrw = huobiXrpPriceByUsdt.multiply(usdtPriceByKrw);
-        BigDecimal kimchiPremium = upbitXrpPriceByKrw.divide(huobiXrpPriceByKrw, 5, RoundingMode.HALF_UP)
-                                                     .subtract(BigDecimal.ONE)
-                                                     .multiply(BigDecimal.valueOf(100L))
-                                                     .setScale(1, RoundingMode.HALF_UP);
+    private void check(MarketType upbitMarketType, MarketType binanceMarketType, CurrencyType currency) {
+        BigDecimal upbitXrpPriceByUsdt = upbitPriceRepository.getCurrentPrice(upbitMarketType);
+        BigDecimal binanceXrpPriceByUsdt = binancePriceRepository.getCurrentPrice(binanceMarketType);
+        BigDecimal kimchiPremium = upbitXrpPriceByUsdt.divide(binanceXrpPriceByUsdt, 5, RoundingMode.HALF_UP)
+                                                      .subtract(BigDecimal.ONE)
+                                                      .multiply(BigDecimal.valueOf(100L))
+                                                      .setScale(1, RoundingMode.HALF_UP);
         kimchiPremiumRepository.save(new KimchiPremium(LocalDateTime.now(), currency, kimchiPremium.doubleValue()));
-        String info = "[" + currency.name() + " Price] upbit: " + upbitXrpPriceByKrw.setScale(0, RoundingMode.HALF_UP)
-            + "원, huobi: " + huobiXrpPriceByKrw.setScale(0, RoundingMode.HALF_UP) + "원"
+        String info = "[" + currency.name() + " Price] upbit: " + upbitXrpPriceByUsdt.setScale(4, RoundingMode.HALF_UP)
+            + "달러, binance: " + binanceXrpPriceByUsdt.setScale(4, RoundingMode.HALF_UP) + "달러"
             + ", 김치 프리미엄: " + kimchiPremium + "%";
         log.info(info);
         if (kimchiPremium.compareTo(BigDecimal.valueOf(3L)) >= 0 || kimchiPremium.compareTo(BigDecimal.valueOf(-3L)) <= 0 ) {
