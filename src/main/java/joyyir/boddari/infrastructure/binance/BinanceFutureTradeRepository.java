@@ -37,6 +37,7 @@ public class BinanceFutureTradeRepository implements FutureTradeRepository {
         this.secretKey = secretKey;
     }
 
+    @Override
     public boolean changeInitialLeverage(MarketType marketType, int leverage) {
         final String endpoint = "https://fapi.binance.com/fapi/v1/leverage";
 
@@ -59,6 +60,7 @@ public class BinanceFutureTradeRepository implements FutureTradeRepository {
         return response.getBody().getLeverage() == leverage;
     }
 
+    @Override
     public boolean changeMarginType(MarketType marketType, String marginType) {
         final String endpoint = "https://fapi.binance.com/fapi/v1/marginType";
 
@@ -89,7 +91,22 @@ public class BinanceFutureTradeRepository implements FutureTradeRepository {
         return response.getBody().getCode() == 200;
     }
 
-    public String order(MarketType marketType, FuturePlaceType placeType, BigDecimal price, BigDecimal quantity, String orderType) {
+    @Override
+    public String marketLong(MarketType marketType, BigDecimal quantity) {
+        return order(marketType, FuturePlaceType.LONG, null, quantity, "MARKET");
+    }
+
+    @Override
+    public String marketShort(MarketType marketType, BigDecimal quantity) {
+        return order(marketType, FuturePlaceType.SHORT, null, quantity, "MARKET");
+    }
+
+    @Override
+    public String limitOrder(MarketType marketType, FuturePlaceType placeType, BigDecimal price, BigDecimal quantity) {
+        return order(marketType, placeType, price, quantity, "LIMIT");
+    }
+
+    private String order(MarketType marketType, FuturePlaceType placeType, BigDecimal price, BigDecimal quantity, String orderType) {
         final String endpoint = "https://fapi.binance.com/fapi/v1/order";
 
         Map<String, String> params = new LinkedHashMap<>();
