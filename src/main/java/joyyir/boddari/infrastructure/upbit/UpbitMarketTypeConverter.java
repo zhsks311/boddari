@@ -1,6 +1,6 @@
 package joyyir.boddari.infrastructure.upbit;
 
-import joyyir.boddari.domain.MarketType;
+import joyyir.boddari.domain.exchange.MarketType;
 
 import java.util.Map;
 

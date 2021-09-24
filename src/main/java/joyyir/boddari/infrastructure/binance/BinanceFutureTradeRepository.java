@@ -1,9 +1,8 @@
 package joyyir.boddari.infrastructure.binance;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import joyyir.boddari.domain.FuturePlaceType;
-import joyyir.boddari.domain.FutureTradeRepository;
-import joyyir.boddari.domain.MarketType;
+import joyyir.boddari.domain.exchange.FuturePlaceType;
+import joyyir.boddari.domain.exchange.FutureTradeRepository;
+import joyyir.boddari.domain.exchange.MarketType;
 import joyyir.boddari.infrastructure.binance.dto.ChangeInitialLeverageDTO;
 import joyyir.boddari.infrastructure.binance.dto.ChangeMarginTypeDTO;
 import joyyir.boddari.infrastructure.binance.dto.FutureOrderDTO;
@@ -23,16 +22,13 @@ import java.util.Map;
 @Repository
 public class BinanceFutureTradeRepository implements FutureTradeRepository {
     private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
     private final String accessKey;
     private final String secretKey;
 
     public BinanceFutureTradeRepository(RestTemplate restTemplate,
-                                        ObjectMapper objectMapper,
                                         @Value("${constant.binance.access-key}") String accessKey,
                                         @Value("${constant.binance.secret-key}") String secretKey) {
         this.restTemplate = restTemplate;
-        this.objectMapper = objectMapper;
         this.accessKey = accessKey;
         this.secretKey = secretKey;
     }

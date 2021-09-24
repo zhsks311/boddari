@@ -2,9 +2,9 @@ package joyyir.boddari.infrastructure.upbit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import joyyir.boddari.domain.MarketType;
-import joyyir.boddari.domain.PlaceType;
-import joyyir.boddari.domain.TradeRepository;
+import joyyir.boddari.domain.exchange.MarketType;
+import joyyir.boddari.domain.exchange.PlaceType;
+import joyyir.boddari.domain.exchange.TradeRepository;
 import joyyir.boddari.infrastructure.upbit.dto.OrderDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;

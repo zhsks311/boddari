@@ -1,8 +1,8 @@
 package joyyir.boddari.infrastructure.upbit;
 
-import joyyir.boddari.domain.CandleRepository;
-import joyyir.boddari.domain.DailyChange;
-import joyyir.boddari.domain.MarketType;
+import joyyir.boddari.domain.exchange.CandleRepository;
+import joyyir.boddari.domain.exchange.DailyChange;
+import joyyir.boddari.domain.exchange.MarketType;
 import joyyir.boddari.infrastructure.upbit.dto.CandleDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;

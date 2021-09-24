@@ -1,4 +1,4 @@
-package joyyir.boddari.domain;
+package joyyir.boddari.domain.bot;
 
 import lombok.Getter;
 import lombok.Setter;

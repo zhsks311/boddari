@@ -1,6 +1,6 @@
 package joyyir.boddari.infrastructure.telegram;
 
-import joyyir.boddari.domain.Bot;
+import joyyir.boddari.domain.bot.Bot;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;

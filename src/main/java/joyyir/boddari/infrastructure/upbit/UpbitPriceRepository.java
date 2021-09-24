@@ -1,7 +1,7 @@
 package joyyir.boddari.infrastructure.upbit;
 
-import joyyir.boddari.domain.MarketType;
-import joyyir.boddari.domain.PriceRepository;
+import joyyir.boddari.domain.exchange.MarketType;
+import joyyir.boddari.domain.exchange.PriceRepository;
 import joyyir.boddari.infrastructure.upbit.dto.TickerDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;

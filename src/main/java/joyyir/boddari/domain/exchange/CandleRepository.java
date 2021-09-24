@@ -1,4 +1,4 @@
-package joyyir.boddari.domain;
+package joyyir.boddari.domain.exchange;
 
 import java.time.LocalDateTime;
 

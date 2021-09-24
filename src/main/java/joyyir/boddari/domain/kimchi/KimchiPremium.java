@@ -1,5 +1,6 @@
-package joyyir.boddari.domain;
+package joyyir.boddari.domain.kimchi;
 
+import joyyir.boddari.domain.exchange.CurrencyType;
 import lombok.Getter;
 
 import javax.persistence.Column;

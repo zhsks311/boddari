@@ -1,11 +1,11 @@
 package joyyir.boddari.interfaces.scheduler;
 
-import joyyir.boddari.domain.Bot;
-import joyyir.boddari.domain.CurrencyType;
-import joyyir.boddari.domain.KimchiPremium;
-import joyyir.boddari.domain.KimchiPremiumRepository;
-import joyyir.boddari.domain.MarketType;
-import joyyir.boddari.domain.PriceRepository;
+import joyyir.boddari.domain.bot.Bot;
+import joyyir.boddari.domain.exchange.CurrencyType;
+import joyyir.boddari.domain.kimchi.KimchiPremium;
+import joyyir.boddari.domain.kimchi.KimchiPremiumRepository;
+import joyyir.boddari.domain.exchange.MarketType;
+import joyyir.boddari.domain.exchange.PriceRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

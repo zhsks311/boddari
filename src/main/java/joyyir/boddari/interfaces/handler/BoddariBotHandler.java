@@ -1,10 +1,10 @@
 package joyyir.boddari.interfaces.handler;
 
-import joyyir.boddari.domain.BotConfig;
-import joyyir.boddari.domain.BotConfigRepository;
-import joyyir.boddari.domain.CandleRepository;
-import joyyir.boddari.domain.DailyChange;
-import joyyir.boddari.domain.MarketType;
+import joyyir.boddari.domain.bot.BotConfig;
+import joyyir.boddari.domain.bot.BotConfigRepository;
+import joyyir.boddari.domain.exchange.CandleRepository;
+import joyyir.boddari.domain.exchange.DailyChange;
+import joyyir.boddari.domain.exchange.MarketType;
 import joyyir.boddari.interfaces.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
