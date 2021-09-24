@@ -88,7 +88,7 @@ public class UpbitTradeRepository implements TradeRepository {
         HttpEntity<String> entity = new HttpEntity<>(paramJson, headers);
         ResponseEntity<OrderDTO> response = restTemplate.postForEntity(endpoint, entity, OrderDTO.class);
         if (response.getBody() == null) {
-            throw new RuntimeException("place failed! response:" + response.toString());
+            throw new RuntimeException("response: " + response.toString());
         }
         return response.getBody().getUuid();
     }

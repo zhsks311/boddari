@@ -13,7 +13,7 @@ import java.util.UUID;
 public class UpbitUtil {
     public static String getAuthenticationToken(Map<String, String> params, String accessKey, String secretKey) {
         try {
-            String queryString = getQueryString(params);
+            String queryString = toQueryString(params);
             MessageDigest md = MessageDigest.getInstance("SHA-512");
             md.update(queryString.getBytes("UTF-8"));
 
@@ -33,7 +33,7 @@ public class UpbitUtil {
         }
     }
 
-    private static String getQueryString(Map<String, String> params) {
+    private static String toQueryString(Map<String, String> params) {
         List<String> queryElements = new ArrayList<>();
 
         for(Map.Entry<String, String> entity : params.entrySet()) {
