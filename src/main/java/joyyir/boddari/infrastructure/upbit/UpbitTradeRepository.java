@@ -35,14 +35,43 @@ public class UpbitTradeRepository implements TradeRepository {
         this.secretKey = secretKey;
     }
 
-    public String order(MarketType marketType, PlaceType placeType, BigDecimal price, BigDecimal volume, String orderType) {
+    /**
+     * @param marketType 거래할 마켓
+     * @param price      시장가 매수에 사용할 금액
+     * @return           주문의 고유 아이디
+     */
+    @Override
+    public String marketBuy(MarketType marketType, BigDecimal price) {
+        return order(marketType, PlaceType.BUY, price, null, "price");
+    }
+
+    /**
+     * @param marketType 거래할 마켓
+     * @param volume     사장가 매도할 코인 개수
+     * @return           주문의 고유 아이디
+     */
+    @Override
+    public String marketSell(MarketType marketType, BigDecimal volume) {
+        return order(marketType, PlaceType.SELL, null, volume, "market");
+    }
+
+    @Override
+    public String limitOrder(MarketType marketType, PlaceType placeType, BigDecimal price, BigDecimal volume) {
+        return order(marketType, placeType, price, volume, "limit");
+    }
+
+    private String order(MarketType marketType, PlaceType placeType, BigDecimal price, BigDecimal volume, String orderType) {
         final String endpoint = "https://api.upbit.com/v1/orders";
 
         Map<String, String> params = new LinkedHashMap<>();
         params.put("market", UpbitMarketTypeConverter.convert(marketType));
         params.put("side", PlaceType.SELL == placeType ? "ask" : "bid");
-        params.put("volume", volume.toString());
-        params.put("price", price.toString());
+        if (volume != null) {
+            params.put("volume", volume.toString());
+        }
+        if (price != null) {
+            params.put("price", price.toString());
+        }
         params.put("ord_type", orderType);
 
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
