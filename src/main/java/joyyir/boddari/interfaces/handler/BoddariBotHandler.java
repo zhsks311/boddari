@@ -8,7 +8,6 @@ import joyyir.boddari.domain.exchange.MarketType;
 import joyyir.boddari.interfaces.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -36,7 +35,7 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
         this.candleRepository = upbitCandleRepository;
     }
 
-    @Scheduled(cron = "0 1 9 * * *")
+//    @Scheduled(cron = "0 1 9 * * *")
     public void newDailyCandleScheduler() {
         DailyChange dailyChange = candleRepository.findDailyChange(MarketType.BTC_KRW, LocalDateTime.now());
         List<BotConfig> botConfigs = botConfigRepository.findAll();

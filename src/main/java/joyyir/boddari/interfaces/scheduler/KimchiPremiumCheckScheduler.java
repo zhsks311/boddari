@@ -9,10 +9,10 @@ import joyyir.boddari.domain.kimchi.KimchiPremiumRepository;
 import joyyir.boddari.service.KimchiPremiumService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 @Component
@@ -23,7 +23,7 @@ public class KimchiPremiumCheckScheduler {
     private final KimchiPremiumRepository kimchiPremiumRepository;
     private final Bot boddariBot;
 
-//    @Scheduled(fixedRate = 1000 * 60)
+    @Scheduled(fixedRate = 1000 * 60)
     void checkKimchiPremium() {
         check(MarketType.BTC_USDT, MarketType.BTC_USDT, CurrencyType.BTC);
         check(MarketType.ETH_USDT, MarketType.ETH_USDT, CurrencyType.ETH);
@@ -35,12 +35,12 @@ public class KimchiPremiumCheckScheduler {
         KimchiPremiumData kimchiPremiumData = kimchiPremiumService.getKimchiPremium(upbitMarketType, binanceMarketType, currency);
         BigDecimal kimchiPremium = kimchiPremiumData.getKimchiPremium();
         kimchiPremiumRepository.save(new KimchiPremium(LocalDateTime.now(), currency, kimchiPremium.doubleValue()));
-        String info = "[" + currency.name() + " Price] upbit: " + kimchiPremiumData.getUpbitPriceByUsdt().setScale(4, RoundingMode.HALF_UP)
-            + "달러, binance: " + kimchiPremiumData.getBinancePriceByUsdt().setScale(4, RoundingMode.HALF_UP) + "달러"
-            + ", 김치 프리미엄: " + kimchiPremium + "%";
-        log.info(info);
-        if (kimchiPremium.compareTo(BigDecimal.valueOf(3L)) >= 0 || kimchiPremium.compareTo(BigDecimal.valueOf(-3L)) <= 0 ) {
-            boddariBot.sendMessage(info);
-        }
+//        String info = "[" + currency.name() + " Price] upbit: " + kimchiPremiumData.getUpbitPriceByUsdt().setScale(4, RoundingMode.HALF_UP)
+//            + "달러, binance: " + kimchiPremiumData.getBinancePriceByUsdt().setScale(4, RoundingMode.HALF_UP) + "달러"
+//            + ", 김치 프리미엄: " + kimchiPremium + "%";
+//        log.info(info);
+//        if (kimchiPremium.compareTo(BigDecimal.valueOf(3L)) >= 0 || kimchiPremium.compareTo(BigDecimal.valueOf(-3L)) <= 0 ) {
+//            boddariBot.sendMessage(info);
+//        }
     }
 }
