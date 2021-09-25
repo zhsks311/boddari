@@ -3,6 +3,9 @@ package joyyir.boddari.infrastructure.upbit.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.math.BigDecimal;
+import java.time.ZonedDateTime;
+
 @Data
 public class OrderDTO {
     @JsonProperty("uuid")
@@ -15,10 +18,10 @@ public class OrderDTO {
     private String ordType;
 
     @JsonProperty("price")
-    private String price;
+    private BigDecimal price;
 
     @JsonProperty("avg_price")
-    private String avgPrice;
+    private BigDecimal avgPrice;
 
     @JsonProperty("state")
     private String state;
@@ -27,28 +30,28 @@ public class OrderDTO {
     private String market;
 
     @JsonProperty("created_at")
-    private String createdAt;
+    private ZonedDateTime createdAt;
 
     @JsonProperty("volume")
-    private String volume;
+    private BigDecimal volume;
 
     @JsonProperty("remaining_volume")
-    private String remainingVolume;
+    private BigDecimal remainingVolume;
 
     @JsonProperty("reserved_fee")
-    private String reservedFee;
+    private BigDecimal reservedFee;
 
     @JsonProperty("remaining_fee")
-    private String remainingFee;
+    private BigDecimal remainingFee;
 
     @JsonProperty("paid_fee")
-    private String paidFee;
+    private BigDecimal paidFee;
 
     @JsonProperty("locked")
-    private String locked;
+    private BigDecimal locked;
 
     @JsonProperty("executed_volume")
-    private String executedVolume;
+    private BigDecimal executedVolume;
 
     @JsonProperty("trades_count")
     private Integer tradesCount;

@@ -2,10 +2,11 @@ package joyyir.boddari.interfaces.scheduler;
 
 import joyyir.boddari.domain.bot.Bot;
 import joyyir.boddari.domain.exchange.CurrencyType;
-import joyyir.boddari.domain.kimchi.KimchiPremium;
-import joyyir.boddari.domain.kimchi.KimchiPremiumRepository;
 import joyyir.boddari.domain.exchange.MarketType;
-import joyyir.boddari.domain.exchange.PriceRepository;
+import joyyir.boddari.domain.kimchi.KimchiPremium;
+import joyyir.boddari.domain.kimchi.KimchiPremiumData;
+import joyyir.boddari.domain.kimchi.KimchiPremiumRepository;
+import joyyir.boddari.service.KimchiPremiumService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,8 +19,7 @@ import java.time.LocalDateTime;
 @Slf4j
 @AllArgsConstructor
 public class KimchiPremiumCheckScheduler {
-    private final PriceRepository upbitPriceRepository;
-    private final PriceRepository binancePriceRepository;
+    private final KimchiPremiumService kimchiPremiumService;
     private final KimchiPremiumRepository kimchiPremiumRepository;
     private final Bot boddariBot;
 
@@ -32,15 +32,11 @@ public class KimchiPremiumCheckScheduler {
     }
 
     private void check(MarketType upbitMarketType, MarketType binanceMarketType, CurrencyType currency) {
-        BigDecimal upbitXrpPriceByUsdt = upbitPriceRepository.getCurrentPrice(upbitMarketType);
-        BigDecimal binanceXrpPriceByUsdt = binancePriceRepository.getCurrentPrice(binanceMarketType);
-        BigDecimal kimchiPremium = upbitXrpPriceByUsdt.divide(binanceXrpPriceByUsdt, 5, RoundingMode.HALF_UP)
-                                                      .subtract(BigDecimal.ONE)
-                                                      .multiply(BigDecimal.valueOf(100L))
-                                                      .setScale(1, RoundingMode.HALF_UP);
+        KimchiPremiumData kimchiPremiumData = kimchiPremiumService.getKimchiPremium(upbitMarketType, binanceMarketType, currency);
+        BigDecimal kimchiPremium = kimchiPremiumData.getKimchiPremium();
         kimchiPremiumRepository.save(new KimchiPremium(LocalDateTime.now(), currency, kimchiPremium.doubleValue()));
-        String info = "[" + currency.name() + " Price] upbit: " + upbitXrpPriceByUsdt.setScale(4, RoundingMode.HALF_UP)
-            + "달러, binance: " + binanceXrpPriceByUsdt.setScale(4, RoundingMode.HALF_UP) + "달러"
+        String info = "[" + currency.name() + " Price] upbit: " + kimchiPremiumData.getUpbitPriceByUsdt().setScale(4, RoundingMode.HALF_UP)
+            + "달러, binance: " + kimchiPremiumData.getBinancePriceByUsdt().setScale(4, RoundingMode.HALF_UP) + "달러"
             + ", 김치 프리미엄: " + kimchiPremium + "%";
         log.info(info);
         if (kimchiPremium.compareTo(BigDecimal.valueOf(3L)) >= 0 || kimchiPremium.compareTo(BigDecimal.valueOf(-3L)) <= 0 ) {

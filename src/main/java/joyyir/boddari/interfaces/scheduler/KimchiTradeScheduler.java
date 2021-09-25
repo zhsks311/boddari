@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -22,6 +23,8 @@ public class KimchiTradeScheduler {
     @Scheduled(fixedRate = 1000 * 60)
     @Transactional
     void kimchiTradeScheduler() {
+        final BigDecimal upbitBuyLimitKrw = new BigDecimal(100000);
+
         KimchiTradeUser user = kimchiTradeService.findUser(userId);
         List<KimchiTradeHistory> tradeHistory = kimchiTradeService.findTradeHistory(user.getUserId(), user.getCurrentTradeId());
         KimchiTradeHistory firstHistory = tradeHistory.get(tradeHistory.size() - 1);
@@ -31,9 +34,9 @@ public class KimchiTradeScheduler {
         }
         log.info(firstHistory.getTimestamp() + "에 시작된 trade의(tradeId: " + user.getCurrentTradeId() + ") 현재 상태: " + lastHistory.getStatus().name());
         if (lastHistory.getStatus() == KimchiTradeStatus.WAITING) {
-            kimchiTradeService.checkBuyTimingAndTrade();
+            kimchiTradeService.checkBuyTimingAndTrade(userId, lastHistory.getTradeId(), upbitBuyLimitKrw);
         } else if (lastHistory.getStatus() == KimchiTradeStatus.STARTED) {
-            kimchiTradeService.checkSellTimingAndTrade();
+            kimchiTradeService.checkSellTimingAndTrade(userId);
         }
     }
 }

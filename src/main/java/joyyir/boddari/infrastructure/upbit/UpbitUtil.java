@@ -33,7 +33,7 @@ public class UpbitUtil {
         }
     }
 
-    private static String toQueryString(Map<String, String> params) {
+    public static String toQueryString(Map<String, String> params) {
         List<String> queryElements = new ArrayList<>();
 
         for(Map.Entry<String, String> entity : params.entrySet()) {

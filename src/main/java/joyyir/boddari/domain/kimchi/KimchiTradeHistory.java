@@ -1,5 +1,6 @@
 package joyyir.boddari.domain.kimchi;
 
+import joyyir.boddari.domain.exchange.CurrencyType;
 import lombok.Getter;
 
 import javax.persistence.Column;
@@ -30,6 +31,11 @@ public class KimchiTradeHistory {
     @Enumerated(value = EnumType.STRING)
     private KimchiTradeStatus status;
 
+    @Enumerated(value = EnumType.STRING)
+    private CurrencyType currencyType;
+
+    private Double kimchiPremium;
+
     public KimchiTradeHistory() {
     }
 
@@ -37,11 +43,13 @@ public class KimchiTradeHistory {
                               String userId,
                               String tradeId,
                               LocalDateTime timestamp,
-                              KimchiTradeStatus status) {
+                              KimchiTradeStatus status, CurrencyType currencyType, Double kimchiPremium) {
         this.id = id;
         this.userId = userId;
         this.tradeId = tradeId;
         this.timestamp = timestamp;
         this.status = status;
+        this.currencyType = currencyType;
+        this.kimchiPremium = kimchiPremium;
     }
 }
