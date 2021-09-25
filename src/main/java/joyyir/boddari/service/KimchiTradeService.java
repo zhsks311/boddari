@@ -16,6 +16,8 @@ import joyyir.boddari.domain.kimchi.KimchiTradeUserRepository;
 import joyyir.boddari.domain.kimchi.TradeDecision;
 import joyyir.boddari.domain.kimchi.strategy.BuyStrategy;
 import joyyir.boddari.domain.kimchi.strategy.DummyBuyStrategy;
+import joyyir.boddari.domain.kimchi.strategy.DummySellStrategy;
+import joyyir.boddari.domain.kimchi.strategy.SellStrategy;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -63,16 +65,27 @@ public class KimchiTradeService {
     }
 
     public void checkBuyTimingAndTrade(String userId, String tradeId, BigDecimal upbitBuyLimitKrw) {
-        BuyStrategy buyStrategy = findBuyStrategy(userId);
+        BuyStrategy buyStrategy = findBuyStrategy();
         TradeDecision decision = buyStrategy.decide();
         if (decision.isTrade()) {
             log.info("[jyjang] 조건이 충족되어 김프 거래를 시작합니다. {}", decision);
-            kimchiTradeBuy(decision.getCurrencyType(), upbitBuyLimitKrw, userId, tradeId);
+            kimchiTradeBuy(decision.getCurrencyType(), upbitBuyLimitKrw);
             kimchiTradeHistoryRepository.save(new KimchiTradeHistory(null, userId, tradeId, LocalDateTime.now(), KimchiTradeStatus.STARTED, decision.getCurrencyType(), decision.getKimchiPremium().doubleValue()));
         }
     }
 
-    private void kimchiTradeBuy(CurrencyType currencyType, BigDecimal upbitBuyLimitKrw, String userId, String tradeId) {
+    public void checkSellTimingAndTrade(String userId, KimchiTradeHistory lastHistory) {
+        SellStrategy sellStrategy = findSellStrategy(lastHistory);
+        TradeDecision decision = sellStrategy.decide();
+        if (decision.isTrade()) {
+            log.info("[jyjang] 조건이 충족되어 김프 거래를 마무리합니다. {}", decision);
+            String tradeId = lastHistory.getTradeId();
+            kimchiTradeSell(decision.getCurrencyType());
+            kimchiTradeHistoryRepository.save(new KimchiTradeHistory(null, userId, tradeId, LocalDateTime.now(), KimchiTradeStatus.FINISHED, decision.getCurrencyType(), decision.getKimchiPremium().doubleValue()));
+        }
+    }
+
+    private void kimchiTradeBuy(CurrencyType currencyType, BigDecimal upbitBuyLimitKrw) {
         MarketType upbitMarket = CurrencyTypeConverter.toMarketType(currencyType, CurrencyType.KRW);
         MarketType binanceMarket = CurrencyTypeConverter.toMarketType(currencyType, CurrencyType.USDT);
         String upbitOrderId = upbitTradeRepository.marketBuy(upbitMarket, upbitBuyLimitKrw);
@@ -103,6 +116,10 @@ public class KimchiTradeService {
         }
     }
 
+    private void kimchiTradeSell(CurrencyType currencyType) {
+        // TODO : jyjang - develop
+    }
+
     private void sleep(long millis) {
         try {
             Thread.sleep(millis);
@@ -111,13 +128,14 @@ public class KimchiTradeService {
         }
     }
 
-    private BuyStrategy findBuyStrategy(String userId) {
+    private BuyStrategy findBuyStrategy() {
         // TODO : jyjang - develop
         return new DummyBuyStrategy(kimchiPremiumService);
     }
 
-    public void checkSellTimingAndTrade(String userId) {
+    private SellStrategy findSellStrategy(KimchiTradeHistory lastHistory) {
         // TODO : jyjang - develop
+        return new DummySellStrategy(kimchiPremiumService, lastHistory);
     }
 }
 

@@ -36,7 +36,7 @@ public class KimchiTradeScheduler {
         if (lastHistory.getStatus() == KimchiTradeStatus.WAITING) {
             kimchiTradeService.checkBuyTimingAndTrade(userId, lastHistory.getTradeId(), upbitBuyLimitKrw);
         } else if (lastHistory.getStatus() == KimchiTradeStatus.STARTED) {
-            kimchiTradeService.checkSellTimingAndTrade(userId);
+            kimchiTradeService.checkSellTimingAndTrade(userId, lastHistory);
         }
     }
 }
