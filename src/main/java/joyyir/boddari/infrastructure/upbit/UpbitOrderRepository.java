@@ -55,7 +55,7 @@ public class UpbitOrderRepository implements OrderRepository {
             throw new RuntimeException("response: " + response.toString());
         }
         OrderStatus orderStatus = order.getState().equalsIgnoreCase("done")
-            || (order.getState().equalsIgnoreCase("cancel") && order.getLocked().doubleValue() < 0.0001)
+            || (order.getState().equalsIgnoreCase("cancel") && order.getLocked().doubleValue() < 1)
             ? OrderStatus.COMPLETED : OrderStatus.UNKNOWN;
         return new OrderDetail(orderStatus, order.getExecutedVolume());
     }

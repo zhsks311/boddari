@@ -16,19 +16,23 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Repository
 public class BinanceFutureTradeRepository implements FutureTradeRepository {
     private final RestTemplate restTemplate;
+    private final BinanceExchangeInfo binanceExchangeInfo;
     private final String accessKey;
     private final String secretKey;
 
     public BinanceFutureTradeRepository(RestTemplate restTemplate,
+                                        BinanceExchangeInfo binanceExchangeInfo,
                                         @Value("${constant.binance.access-key}") String accessKey,
                                         @Value("${constant.binance.secret-key}") String secretKey) {
         this.restTemplate = restTemplate;
+        this.binanceExchangeInfo = binanceExchangeInfo;
         this.accessKey = accessKey;
         this.secretKey = secretKey;
     }
@@ -104,19 +108,20 @@ public class BinanceFutureTradeRepository implements FutureTradeRepository {
 
     private String order(MarketType marketType, FuturePlaceType placeType, BigDecimal price, BigDecimal quantity, String orderType) {
         final String endpoint = "https://fapi.binance.com/fapi/v1/order";
+        String symbol = BinanceMarketTypeConverter.convert(marketType);
 
         Map<String, String> params = new LinkedHashMap<>();
-        params.put("symbol", BinanceMarketTypeConverter.convert(marketType));
+        params.put("symbol", symbol);
         params.put("side", FuturePlaceType.SHORT == placeType ? "SELL" : "BUY");
         params.put("type", orderType);
         if ("LIMIT".equals(orderType)) {
             params.put("timeInForce", "GTC"); // GTC - Good Till Cancel
         }
         if (quantity != null) {
-            params.put("quantity", quantity.toString());
+            params.put("quantity", quantity.setScale(binanceExchangeInfo.getQuantityPrecision(symbol), RoundingMode.HALF_UP).toString());
         }
         if (price != null) {
-            params.put("price", price.toString());
+            params.put("price", price.setScale(binanceExchangeInfo.getPricePrecision(symbol), RoundingMode.HALF_UP).toString());
         }
         params.put("timestamp", String.valueOf(System.currentTimeMillis()));
         params.put("signature", BinanceUtil.getSignature(params, secretKey));

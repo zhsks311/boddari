@@ -66,7 +66,7 @@ public class KimchiTradeService {
         BuyStrategy buyStrategy = findBuyStrategy(userId);
         TradeDecision decision = buyStrategy.decide();
         if (decision.isTrade()) {
-            log.info("조건이 충족되어 김프 거래를 시작합니다. {}", decision);
+            log.info("[jyjang] 조건이 충족되어 김프 거래를 시작합니다. {}", decision);
             kimchiTradeBuy(decision.getCurrencyType(), upbitBuyLimitKrw, userId, tradeId);
             kimchiTradeHistoryRepository.save(new KimchiTradeHistory(null, userId, tradeId, LocalDateTime.now(), KimchiTradeStatus.STARTED, decision.getCurrencyType(), decision.getKimchiPremium().doubleValue()));
         }
@@ -80,7 +80,7 @@ public class KimchiTradeService {
         for (int i = 0; i < 5; i++) {
             upbitOrderDetail = upbitOrderRepository.getOrderDetail(null, upbitOrderId);
             if (upbitOrderDetail.getOrderStatus() == OrderStatus.COMPLETED) {
-                log.info("업비트 시장가 매수 완료. {} 마켓에서 {}개 매수", upbitMarket.name(), upbitOrderDetail.getOrderQty());
+                log.info("[jyjang] 업비트 시장가 매수 완료. {} 마켓에서 {}개 매수", upbitMarket.name(), upbitOrderDetail.getOrderQty());
                 break;
             }
             if (i == 4) {
@@ -89,11 +89,11 @@ public class KimchiTradeService {
             sleep(1000);
         }
         String binanceOrderId = binanceFutureTradeRepository.marketShort(binanceMarket, upbitOrderDetail.getOrderQty());
-        OrderDetail binanceOrderDetail = null;
+        OrderDetail binanceOrderDetail;
         for (int i = 0; i < 5; i++) {
             binanceOrderDetail = binanceFutureOrderRepository.getOrderDetail(binanceMarket, binanceOrderId);
             if (binanceOrderDetail.getOrderStatus() == OrderStatus.COMPLETED) {
-                log.info("바이낸스 시장가 숏 완료. {} 마켓에서 {}개 매수", binanceMarket.name(), binanceOrderDetail.getOrderQty());
+                log.info("[jyjang] 바이낸스 시장가 숏 완료. {} 마켓에서 {}개 매수", binanceMarket.name(), binanceOrderDetail.getOrderQty());
                 break;
             }
             if (i == 4) {

@@ -23,7 +23,7 @@ public class KimchiTradeScheduler {
     @Scheduled(fixedRate = 1000 * 60)
     @Transactional
     void kimchiTradeScheduler() {
-        final BigDecimal upbitBuyLimitKrw = new BigDecimal(100000);
+        final BigDecimal upbitBuyLimitKrw = new BigDecimal(50000);
 
         KimchiTradeUser user = kimchiTradeService.findUser(userId);
         List<KimchiTradeHistory> tradeHistory = kimchiTradeService.findTradeHistory(user.getUserId(), user.getCurrentTradeId());
@@ -32,7 +32,7 @@ public class KimchiTradeScheduler {
         if (lastHistory.getStatus() == KimchiTradeStatus.FINISHED) {
             firstHistory = lastHistory = kimchiTradeService.startNewTrade(userId);
         }
-        log.info(firstHistory.getTimestamp() + "에 시작된 trade의(tradeId: " + user.getCurrentTradeId() + ") 현재 상태: " + lastHistory.getStatus().name());
+        log.info("[jyjang] " + firstHistory.getTimestamp() + "에 시작된 trade의(tradeId: " + user.getCurrentTradeId() + ") 현재 상태: " + lastHistory.getStatus().name());
         if (lastHistory.getStatus() == KimchiTradeStatus.WAITING) {
             kimchiTradeService.checkBuyTimingAndTrade(userId, lastHistory.getTradeId(), upbitBuyLimitKrw);
         } else if (lastHistory.getStatus() == KimchiTradeStatus.STARTED) {
