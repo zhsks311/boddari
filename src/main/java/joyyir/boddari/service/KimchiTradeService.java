@@ -45,16 +45,32 @@ public class KimchiTradeService {
     public void kimchiTrade(String userId, BigDecimal upbitBuyLimitKrw) {
         KimchiTradeUser user = findUser(userId);
         List<KimchiTradeHistory> tradeHistory = findTradeHistory(user.getUserId(), user.getCurrentTradeId());
-        KimchiTradeHistory firstHistory = tradeHistory.get(tradeHistory.size() - 1);
-        KimchiTradeHistory lastHistory = tradeHistory.get(0);
-        if (lastHistory.getStatus() == KimchiTradeStatus.FINISHED) {
-            firstHistory = lastHistory = startNewTrade(userId);
-        }
-        log.info("[jyjang] " + firstHistory.getTimestamp() + "에 시작된 trade의(tradeId: " + user.getCurrentTradeId() + ") 현재 상태: " + lastHistory.getStatus().name());
-        if (lastHistory.getStatus() == KimchiTradeStatus.WAITING) {
-            checkBuyTimingAndTrade(userId, lastHistory.getTradeId(), upbitBuyLimitKrw);
-        } else if (lastHistory.getStatus() == KimchiTradeStatus.STARTED) {
-            checkSellTimingAndTrade(userId, lastHistory);
+
+        try {
+            KimchiTradeHistory firstHistory = tradeHistory.get(tradeHistory.size() - 1);
+            KimchiTradeHistory lastHistory = tradeHistory.get(0);
+            if (lastHistory.getStatus() == KimchiTradeStatus.ERROR) {
+                log.info("마지막 트레이드에서 오류가 발생했습니다. 오류를 확인하세요.");
+                return;
+            }
+            if (lastHistory.getStatus() == KimchiTradeStatus.FINISHED) {
+                firstHistory = lastHistory = startNewTrade(userId);
+            }
+            log.info("[jyjang] " + firstHistory.getTimestamp() + "에 시작된 trade의(tradeId: " + user.getCurrentTradeId() + ") 현재 상태: " + lastHistory.getStatus().name());
+            if (lastHistory.getStatus() == KimchiTradeStatus.WAITING) {
+                checkBuyTimingAndTrade(userId, lastHistory.getTradeId(), upbitBuyLimitKrw);
+            } else if (lastHistory.getStatus() == KimchiTradeStatus.STARTED) {
+                checkSellTimingAndTrade(userId, lastHistory);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            kimchiTradeHistoryRepository.save(new KimchiTradeHistory(null,
+                                                                     userId,
+                                                                     user.getCurrentTradeId(),
+                                                                     LocalDateTime.now(),
+                                                                     KimchiTradeStatus.ERROR,
+                                                                     null,
+                                                                     null));
         }
     }
 
