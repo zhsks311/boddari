@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -36,6 +37,12 @@ public class KimchiTradeHistory {
 
     private Double kimchiPremium;
 
+    @Column(precision = 20, scale = 8)
+    private BigDecimal buyQuantity;
+
+    @Column(precision = 20, scale = 8)
+    private BigDecimal shortQuantity;
+
     public KimchiTradeHistory() {
     }
 
@@ -43,7 +50,9 @@ public class KimchiTradeHistory {
                               String userId,
                               String tradeId,
                               LocalDateTime timestamp,
-                              KimchiTradeStatus status, CurrencyType currencyType, Double kimchiPremium) {
+                              KimchiTradeStatus status,
+                              CurrencyType currencyType,
+                              Double kimchiPremium) {
         this.id = id;
         this.userId = userId;
         this.tradeId = tradeId;
@@ -51,5 +60,25 @@ public class KimchiTradeHistory {
         this.status = status;
         this.currencyType = currencyType;
         this.kimchiPremium = kimchiPremium;
+    }
+
+    public KimchiTradeHistory(Long id,
+                              String userId,
+                              String tradeId,
+                              LocalDateTime timestamp,
+                              KimchiTradeStatus status,
+                              CurrencyType currencyType,
+                              Double kimchiPremium,
+                              BigDecimal buyQuantity,
+                              BigDecimal shortQuantity) {
+        this.id = id;
+        this.userId = userId;
+        this.tradeId = tradeId;
+        this.timestamp = timestamp;
+        this.status = status;
+        this.currencyType = currencyType;
+        this.kimchiPremium = kimchiPremium;
+        this.buyQuantity = buyQuantity;
+        this.shortQuantity = shortQuantity;
     }
 }
