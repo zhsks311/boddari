@@ -24,7 +24,7 @@ public class DummyBuyStrategy implements BuyStrategy {
             kimchiPremiumData.add(kimchiPremiumService.getKimchiPremium(TARGET_MARKET.get(i), TARGET_MARKET.get(i), TARGET_CURRENCY.get(i)));
         }
         KimchiPremiumData filtered = kimchiPremiumData.stream()
-                                                      .filter(x -> x.getKimchiPremium().doubleValue() < -2.5)
+                                                      .filter(x -> x.getKimchiPremium().doubleValue() < -2.0)
                                                       .findFirst()
                                                       .orElse(null);
         if (filtered == null) {
