@@ -10,7 +10,5 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class KimchiPremiumData {
     private CurrencyType currencyType;
-    private BigDecimal upbitPriceByUsdt;
-    private BigDecimal binancePriceByUsdt;
     private BigDecimal kimchiPremium;
 }

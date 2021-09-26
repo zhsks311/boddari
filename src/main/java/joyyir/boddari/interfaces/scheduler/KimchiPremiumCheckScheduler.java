@@ -2,7 +2,6 @@ package joyyir.boddari.interfaces.scheduler;
 
 import joyyir.boddari.domain.bot.Bot;
 import joyyir.boddari.domain.exchange.CurrencyType;
-import joyyir.boddari.domain.exchange.MarketType;
 import joyyir.boddari.domain.kimchi.KimchiPremium;
 import joyyir.boddari.domain.kimchi.KimchiPremiumData;
 import joyyir.boddari.domain.kimchi.KimchiPremiumRepository;
@@ -14,25 +13,24 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 @Slf4j
 @AllArgsConstructor
 public class KimchiPremiumCheckScheduler {
+    private final static List<CurrencyType> TARGET_CURRENCIES = List.of(CurrencyType.BTC, CurrencyType.ETH, CurrencyType.XRP, CurrencyType.ETC);
     private final KimchiPremiumService kimchiPremiumService;
     private final KimchiPremiumRepository kimchiPremiumRepository;
     private final Bot boddariBot;
 
     @Scheduled(fixedRate = 1000 * 60)
     void checkKimchiPremium() {
-        check(MarketType.BTC_USDT, MarketType.BTC_USDT, CurrencyType.BTC);
-        check(MarketType.ETH_USDT, MarketType.ETH_USDT, CurrencyType.ETH);
-        check(MarketType.XRP_USDT, MarketType.XRP_USDT, CurrencyType.XRP);
-        check(MarketType.ETC_USDT, MarketType.ETC_USDT, CurrencyType.ETC);
+        TARGET_CURRENCIES.forEach(this::check);
     }
 
-    private void check(MarketType upbitMarketType, MarketType binanceMarketType, CurrencyType currency) {
-        KimchiPremiumData kimchiPremiumData = kimchiPremiumService.getKimchiPremium(upbitMarketType, binanceMarketType, currency);
+    private void check(CurrencyType currency) {
+        KimchiPremiumData kimchiPremiumData = kimchiPremiumService.getKimchiPremium(currency);
         BigDecimal kimchiPremium = kimchiPremiumData.getKimchiPremium();
         kimchiPremiumRepository.save(new KimchiPremium(LocalDateTime.now(), currency, kimchiPremium.doubleValue()));
 //        String info = "[" + currency.name() + " Price] upbit: " + kimchiPremiumData.getUpbitPriceByUsdt().setScale(4, RoundingMode.HALF_UP)
