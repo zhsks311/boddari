@@ -17,7 +17,7 @@ public class DummySellStrategy implements SellStrategy {
     public TradeDecision decide() {
         CurrencyType currencyType = lastHistory.getCurrencyType();
         KimchiPremiumData kimchiPremium = kimchiPremiumService.getKimchiPremium(currencyType);
-        if (kimchiPremium == null || kimchiPremium.getKimchiPremium().doubleValue() < 5.0) {
+        if (kimchiPremium == null || kimchiPremium.getKimchiPremium().doubleValue() < 5.0) { // TODO : jyjang - parameterize
             return new TradeDecision(null, null, false, null);
         }
         return new TradeDecision(currencyType, PlaceType.SELL, true, kimchiPremium.getKimchiPremium());

@@ -19,7 +19,17 @@ import java.util.List;
 @Slf4j
 @AllArgsConstructor
 public class KimchiPremiumCheckScheduler {
-    private final static List<CurrencyType> TARGET_CURRENCIES = List.of(CurrencyType.BTC, CurrencyType.ETH, CurrencyType.XRP, CurrencyType.ETC);
+    private final static List<CurrencyType> TARGET_CURRENCIES
+        = List.of(CurrencyType.BTC,
+                  CurrencyType.ETH,
+                  CurrencyType.XRP,
+                  CurrencyType.ETC,
+                  CurrencyType.ADA,
+                  CurrencyType.XTZ,
+                  CurrencyType.ATOM,
+                  CurrencyType.SRM,
+                  CurrencyType.DOT,
+                  CurrencyType.MANA);
     private final KimchiPremiumService kimchiPremiumService;
     private final KimchiPremiumRepository kimchiPremiumRepository;
     private final Bot boddariBot;

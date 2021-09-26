@@ -18,7 +18,7 @@ public class DummyBuyStrategy implements BuyStrategy {
     public TradeDecision decide() {
         KimchiPremiumData filtered = TARGET_CURRENCIES.stream()
                                                       .map(kimchiPremiumService::getKimchiPremium)
-                                                      .filter(x -> x.getKimchiPremium().doubleValue() < 2.5)
+                                                      .filter(x -> x.getKimchiPremium().doubleValue() < 2.5) // TODO : jyjang - parameterize
                                                       .findFirst()
                                                       .orElse(null);
         if (filtered == null) {
