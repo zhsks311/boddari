@@ -9,6 +9,7 @@ public class UpbitMarketTypeConverter {
         Map.entry(MarketType.BTC_KRW, "KRW-BTC"),
         Map.entry(MarketType.ETH_KRW, "KRW-ETH"),
         Map.entry(MarketType.XRP_KRW, "KRW-XRP"),
+        Map.entry(MarketType.ETC_KRW, "KRW-ETC"),
 
         Map.entry(MarketType.BTC_USDT, "USDT-BTC"),
         Map.entry(MarketType.ETH_USDT, "USDT-ETH"),
