@@ -1,7 +1,6 @@
 package joyyir.boddari.service;
 
 import joyyir.boddari.domain.exchange.CurrencyType;
-import joyyir.boddari.domain.exchange.CurrencyTypeConverter;
 import joyyir.boddari.domain.exchange.FutureTradeRepository;
 import joyyir.boddari.domain.exchange.MarketType;
 import joyyir.boddari.domain.exchange.OrderDetail;
@@ -139,7 +138,7 @@ public class KimchiTradeService {
     }
 
     private TradeResult kimchiTradeBuy(CurrencyType currencyType, BigDecimal upbitBuyLimitKrw) {
-        MarketType upbitMarket = CurrencyTypeConverter.toMarketType(currencyType, CurrencyType.KRW);
+        MarketType upbitMarket = currencyType.getKrwMarket();
         String upbitOrderId = upbitTradeRepository.marketBuy(upbitMarket, upbitBuyLimitKrw);
         OrderDetail upbitOrderDetail = null;
         for (int i = 0; i < 5; i++) {
@@ -153,7 +152,7 @@ public class KimchiTradeService {
             }
             sleep(1000);
         }
-        MarketType binanceMarket = CurrencyTypeConverter.toMarketType(currencyType, CurrencyType.USDT);
+        MarketType binanceMarket = currencyType.getUsdtMarket();
         String binanceOrderId = binanceFutureTradeRepository.marketShort(binanceMarket, upbitOrderDetail.getOrderQty());
         OrderDetail binanceOrderDetail = null;
         for (int i = 0; i < 5; i++) {
@@ -171,7 +170,7 @@ public class KimchiTradeService {
     }
 
     private TradeResult kimchiTradeSell(CurrencyType currencyType, BigDecimal buyQuantity, BigDecimal shortQuantity) {
-        MarketType upbitMarket = CurrencyTypeConverter.toMarketType(currencyType, CurrencyType.KRW);
+        MarketType upbitMarket = currencyType.getKrwMarket();
         String upbitOrderId = upbitTradeRepository.marketSell(upbitMarket, buyQuantity);
         OrderDetail upbitOrderDetail = null;
         for (int i = 0; i < 5; i++) {
@@ -185,7 +184,7 @@ public class KimchiTradeService {
             }
             sleep(1000);
         }
-        MarketType binanceMarket = CurrencyTypeConverter.toMarketType(currencyType, CurrencyType.USDT);
+        MarketType binanceMarket = currencyType.getUsdtMarket();
         String binanceOrderId = binanceFutureTradeRepository.marketLong(binanceMarket, shortQuantity);
         OrderDetail binanceOrderDetail = null;
         for (int i = 0; i < 5; i++) {

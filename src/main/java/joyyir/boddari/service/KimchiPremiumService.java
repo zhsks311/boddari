@@ -1,7 +1,6 @@
 package joyyir.boddari.service;
 
 import joyyir.boddari.domain.exchange.CurrencyType;
-import joyyir.boddari.domain.exchange.CurrencyTypeConverter;
 import joyyir.boddari.domain.exchange.PriceRepository;
 import joyyir.boddari.domain.exchange.UsdPriceRepository;
 import joyyir.boddari.domain.kimchi.KimchiPremiumData;
@@ -20,8 +19,8 @@ public class KimchiPremiumService {
 
     public KimchiPremiumData getKimchiPremium(CurrencyType currency) {
         BigDecimal usdPriceKrw = usdPriceRepository.getUsdPriceKrw();
-        BigDecimal upbitPriceByKrw = upbitPriceRepository.getCurrentPrice(CurrencyTypeConverter.toMarketType(currency, CurrencyType.KRW));
-        BigDecimal binancePriceByUsdt = binancePriceRepository.getCurrentPrice(CurrencyTypeConverter.toMarketType(currency, CurrencyType.USDT));
+        BigDecimal upbitPriceByKrw = upbitPriceRepository.getCurrentPrice(currency.getKrwMarket());
+        BigDecimal binancePriceByUsdt = binancePriceRepository.getCurrentPrice(currency.getUsdtMarket());
         BigDecimal binancePriceByKrw = binancePriceByUsdt.multiply(usdPriceKrw);
         BigDecimal kimchiPremium = upbitPriceByKrw.divide(binancePriceByKrw, 5, RoundingMode.HALF_UP)
                                                   .subtract(BigDecimal.ONE)
