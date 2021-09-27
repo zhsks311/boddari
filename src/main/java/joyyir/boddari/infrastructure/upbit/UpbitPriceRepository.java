@@ -18,6 +18,9 @@ public class UpbitPriceRepository implements PriceRepository {
 
     @Override
     public BigDecimal getCurrentPrice(MarketType marketType) {
+        try {
+            Thread.sleep(34); // 초당 최대 30회 호출 가능
+        } catch (InterruptedException ignored) {}
         ResponseEntity<TickerDTO[]> result = restTemplate.getForEntity("https://api.upbit.com/v1/ticker?markets=" + UpbitMarketTypeConverter.convert(marketType), TickerDTO[].class);
         return Objects.requireNonNull(result.getBody())[0].getTradePrice();
     }
