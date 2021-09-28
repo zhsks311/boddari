@@ -1,5 +1,6 @@
 package joyyir.boddari.service;
 
+import joyyir.boddari.domain.bot.Bot;
 import joyyir.boddari.domain.exchange.CurrencyType;
 import joyyir.boddari.domain.exchange.FutureTradeRepository;
 import joyyir.boddari.domain.exchange.MarketType;
@@ -39,6 +40,7 @@ public class KimchiTradeService {
     private final OrderRepository upbitOrderRepository;
     private final OrderRepository binanceFutureOrderRepository;
     private final FutureTradeRepository binanceFutureTradeRepository;
+    private final Bot boddariBot;
 
     @Transactional
     public void kimchiTrade(String userId, BigDecimal upbitBuyLimitKrw) {
@@ -70,6 +72,7 @@ public class KimchiTradeService {
                                                                      KimchiTradeStatus.ERROR,
                                                                      null,
                                                                      null));
+            boddariBot.sendMessage(e.getMessage());
         }
     }
 
