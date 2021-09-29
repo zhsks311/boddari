@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity
-@Table(name = "kimchi_trade_history", indexes = @Index(name = "kimchi_trade_history_userId_tradeId_index", columnList = "userId,tradeId"))
+@Table(name = "kimchi_trade_history", indexes = {@Index(name = "kimchi_trade_history_userId_tradeId_index", columnList = "userId,tradeId"),
+                                                 @Index(name = "kimchi_trade_history_userId_timestamp_index", columnList = "userId,timestamp")})
 public class KimchiTradeHistory {
     @Id
     @GeneratedValue

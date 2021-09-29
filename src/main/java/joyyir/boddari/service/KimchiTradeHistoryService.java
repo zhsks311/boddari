@@ -42,4 +42,8 @@ public class KimchiTradeHistoryService {
                                                                         profit != null ? profit.getProfitAmount() : null,
                                                                         profit != null ? profit.getProfitRate() : null));
     }
+
+    public List<KimchiTradeHistory> findAllByUserIdAndTimestampAfter(String userId, LocalDateTime timeAfter) {
+        return this.kimchiTradeHistoryRepository.findAllByUserIdAndTimestampAfter(userId, timeAfter);
+    }
 }

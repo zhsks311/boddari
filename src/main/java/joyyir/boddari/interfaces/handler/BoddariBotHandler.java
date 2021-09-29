@@ -59,6 +59,7 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
                             "/trade pause : 현재 트레이딩 일시 중지\n" +
                             "/trade resume : 일시 중지된 트레이딩 재개\n" +
                             "/trade status : 현재 진행 중인 트레이딩 상태 확인\n" +
+                            "/trade history : 최근 n일 동안 진행된 트레이드 히스토리 확인 (예시) /trade history 5\n" +
                             "\n" +
                             "문의 사항은 joyyir@naver.com으로 보내주세요.\n" +
                             "";
