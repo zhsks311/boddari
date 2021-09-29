@@ -41,7 +41,25 @@ public class KimchiTradeHistory {
     private BigDecimal buyQuantity;
 
     @Column(precision = 20, scale = 8)
+    private BigDecimal buyAvgPrice;
+
+    @Column(precision = 20, scale = 8)
+    private BigDecimal buyFee;
+
+    @Column(precision = 20, scale = 8)
     private BigDecimal shortQuantity;
+
+    @Column(precision = 20, scale = 8)
+    private BigDecimal shortAvgPrice;
+
+    @Column(precision = 20, scale = 8)
+    private BigDecimal shortFee;
+
+    @Column(precision = 20, scale = 8)
+    private BigDecimal profitAmount;
+
+    @Column(precision = 20, scale = 8)
+    private BigDecimal profitRate;
 
     public KimchiTradeHistory() {
     }
@@ -70,7 +88,13 @@ public class KimchiTradeHistory {
                               CurrencyType currencyType,
                               Double kimchiPremium,
                               BigDecimal buyQuantity,
-                              BigDecimal shortQuantity) {
+                              BigDecimal buyAvgPrice,
+                              BigDecimal buyFee,
+                              BigDecimal shortQuantity,
+                              BigDecimal shortAvgPrice,
+                              BigDecimal shortFee,
+                              BigDecimal profitAmount,
+                              BigDecimal profitRate) {
         this.id = id;
         this.userId = userId;
         this.tradeId = tradeId;
@@ -79,6 +103,12 @@ public class KimchiTradeHistory {
         this.currencyType = currencyType;
         this.kimchiPremium = kimchiPremium;
         this.buyQuantity = buyQuantity;
+        this.buyAvgPrice = buyAvgPrice;
+        this.buyFee = buyFee;
         this.shortQuantity = shortQuantity;
+        this.shortAvgPrice = shortAvgPrice;
+        this.shortFee = shortFee;
+        this.profitAmount = profitAmount;
+        this.profitRate = profitRate;
     }
 }

@@ -8,8 +8,10 @@ import joyyir.boddari.domain.exchange.OrderDetail;
 import joyyir.boddari.domain.exchange.OrderRepository;
 import joyyir.boddari.domain.exchange.OrderStatus;
 import joyyir.boddari.domain.exchange.TradeRepository;
+import joyyir.boddari.domain.exchange.UsdPriceRepository;
 import joyyir.boddari.domain.kimchi.KimchiTradeHistory;
 import joyyir.boddari.domain.kimchi.KimchiTradeHistoryRepository;
+import joyyir.boddari.domain.kimchi.KimchiTradeProfit;
 import joyyir.boddari.domain.kimchi.KimchiTradeStatus;
 import joyyir.boddari.domain.kimchi.KimchiTradeUser;
 import joyyir.boddari.domain.kimchi.KimchiTradeUserRepository;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -40,6 +43,7 @@ public class KimchiTradeService {
     private final OrderRepository upbitOrderRepository;
     private final OrderRepository binanceFutureOrderRepository;
     private final FutureTradeRepository binanceFutureTradeRepository;
+    private final UsdPriceRepository usdPriceRepository;
     private final Bot boddariBot;
 
     @Transactional
@@ -61,7 +65,7 @@ public class KimchiTradeService {
             if (lastHistory.getStatus() == KimchiTradeStatus.WAITING) {
                 checkBuyTimingAndTrade(userId, lastHistory.getTradeId(), upbitBuyLimitKrw);
             } else if (lastHistory.getStatus() == KimchiTradeStatus.STARTED) {
-                checkSellTimingAndTrade(userId, lastHistory);
+                checkSellTimingAndTrade(userId, lastHistory, tradeHistory);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -114,12 +118,20 @@ public class KimchiTradeService {
                                                                      KimchiTradeStatus.STARTED,
                                                                      decision.getCurrencyType(),
                                                                      decision.getKimchiPremium().doubleValue(),
-                                                                     tradeResult.getBuyQuantity(),
-                                                                     tradeResult.getShortQuantity()));
+                                                                     tradeResult.getBuyOrderDetail().getOrderQty(),
+                                                                     tradeResult.getBuyOrderDetail().getAveragePrice(),
+                                                                     tradeResult.getBuyOrderDetail().getFee(),
+                                                                     tradeResult.getShortOrderDetail().getOrderQty(),
+                                                                     tradeResult.getShortOrderDetail().getAveragePrice(),
+                                                                     tradeResult.getShortOrderDetail().getFee(),
+                                                                     null,
+                                                                     null));
         }
     }
 
-    private void checkSellTimingAndTrade(String userId, KimchiTradeHistory lastHistory) {
+    private void checkSellTimingAndTrade(String userId,
+                                         KimchiTradeHistory lastHistory,
+                                         List<KimchiTradeHistory> tradeHistory) {
         SellStrategy sellStrategy = findSellStrategy(lastHistory);
         TradeDecision decision = sellStrategy.decide();
         if (decision.isTrade()) {
@@ -128,6 +140,11 @@ public class KimchiTradeService {
             TradeResult tradeResult = kimchiTradeSell(decision.getCurrencyType(),
                                                       lastHistory.getBuyQuantity(),
                                                       lastHistory.getShortQuantity());
+            KimchiTradeHistory buyHistory = tradeHistory.stream()
+                                                        .filter(x -> x.getStatus() == KimchiTradeStatus.STARTED)
+                                                        .findFirst()
+                                                        .orElse(null);
+            KimchiTradeProfit profit = calculateProfit(tradeResult, buyHistory);
             kimchiTradeHistoryRepository.save(new KimchiTradeHistory(null,
                                                                      userId,
                                                                      tradeId,
@@ -135,9 +152,44 @@ public class KimchiTradeService {
                                                                      KimchiTradeStatus.FINISHED,
                                                                      decision.getCurrencyType(),
                                                                      decision.getKimchiPremium().doubleValue(),
-                                                                     tradeResult.getBuyQuantity(),
-                                                                     tradeResult.getShortQuantity()));
+                                                                     tradeResult.getBuyOrderDetail().getOrderQty(),
+                                                                     tradeResult.getBuyOrderDetail().getAveragePrice(),
+                                                                     tradeResult.getBuyOrderDetail().getFee(),
+                                                                     tradeResult.getShortOrderDetail().getOrderQty(),
+                                                                     tradeResult.getShortOrderDetail().getAveragePrice(),
+                                                                     tradeResult.getShortOrderDetail().getFee(),
+                                                                     profit != null ? profit.getProfitAmount() : null,
+                                                                     profit != null ? profit.getProfitRate() : null));
+
         }
+    }
+
+    KimchiTradeProfit calculateProfit(TradeResult tradeResult, KimchiTradeHistory buyHistory) {
+        if (buyHistory == null) {
+            return null;
+        }
+        OrderDetail upbitSellOrderDetail = tradeResult.getBuyOrderDetail();
+        OrderDetail binanceLongOrderDetail = tradeResult.getShortOrderDetail();
+        BigDecimal upbitBuyCost = buyHistory.getBuyAvgPrice()
+                                            .multiply(buyHistory.getBuyQuantity())
+                                            .add(buyHistory.getBuyFee());
+        BigDecimal upbitSellProfit = upbitSellOrderDetail.getAveragePrice()
+                                                         .multiply(upbitSellOrderDetail.getOrderQty())
+                                                         .subtract(upbitSellOrderDetail.getFee());
+        BigDecimal binanceShortCost = buyHistory.getShortAvgPrice()
+                                                .multiply(buyHistory.getShortQuantity())
+                                                .add(buyHistory.getShortFee());
+        BigDecimal binanceLongProfit = binanceLongOrderDetail.getAveragePrice()
+                                                             .multiply(binanceLongOrderDetail.getOrderQty())
+                                                             .subtract(binanceLongOrderDetail.getFee());
+        BigDecimal usdPriceKrw = usdPriceRepository.getUsdPriceKrw();
+        BigDecimal profitAmount = upbitSellProfit.subtract(upbitBuyCost)
+                                                 .add(binanceShortCost.subtract(binanceLongProfit)
+                                                                      .multiply(usdPriceKrw))
+                                                 .setScale(0, RoundingMode.FLOOR);
+        BigDecimal profitRate = profitAmount.multiply(new BigDecimal(100))
+                                            .divide(upbitBuyCost.add(binanceShortCost.multiply(usdPriceKrw)), 2, RoundingMode.HALF_UP);
+        return new KimchiTradeProfit(profitAmount, profitRate);
     }
 
     private TradeResult kimchiTradeBuy(CurrencyType currencyType, BigDecimal upbitBuyLimitKrw) {
@@ -169,7 +221,7 @@ public class KimchiTradeService {
             }
             sleep(1000);
         }
-        return new TradeResult(upbitOrderDetail.getOrderQty(), binanceOrderDetail.getOrderQty());
+        return new TradeResult(upbitOrderDetail, binanceOrderDetail);
     }
 
     private TradeResult kimchiTradeSell(CurrencyType currencyType, BigDecimal buyQuantity, BigDecimal shortQuantity) {
@@ -201,7 +253,7 @@ public class KimchiTradeService {
             }
             sleep(1000);
         }
-        return new TradeResult(upbitOrderDetail.getOrderQty(), binanceOrderDetail.getOrderQty());
+        return new TradeResult(upbitOrderDetail, binanceOrderDetail);
     }
 
     private void sleep(long millis) {
