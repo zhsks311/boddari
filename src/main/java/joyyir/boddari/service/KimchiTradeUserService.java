@@ -28,11 +28,7 @@ public class KimchiTradeUserService {
             throw new RuntimeException("등록되지 않은 유저입니다. userId:" + userId);
         }
         String newTradeId = UUID.randomUUID().toString();
-
-        user.setCurrentTradeId(newTradeId);
-        user.setTradeStatus(TradeStatus.START);
-        KimchiTradeUser savedUser = kimchiTradeUserRepository.save(user);
-
+        KimchiTradeUser savedUser = setUserTradeStatus(user, TradeStatus.START, newTradeId);
         KimchiTradeHistory savedTradeHistory = tradeHistoryService.saveNewHistory(userId, newTradeId, KimchiTradeStatus.WAITING);
         return new UserAndTradeHistory(savedUser, savedTradeHistory);
     }
@@ -45,8 +41,11 @@ public class KimchiTradeUserService {
         kimchiTradeUserRepository.delete(user);
     }
 
-    public KimchiTradeUser setUserTradeStatus(KimchiTradeUser user, TradeStatus status) {
+    public KimchiTradeUser setUserTradeStatus(KimchiTradeUser user, TradeStatus status, String newTradeId) {
         user.setTradeStatus(status);
+        if (newTradeId != null) {
+            user.setCurrentTradeId(newTradeId);
+        }
         return kimchiTradeUserRepository.save(user);
     }
 }

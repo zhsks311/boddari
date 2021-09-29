@@ -2,8 +2,10 @@ package joyyir.boddari.interfaces.controller;
 
 import joyyir.boddari.domain.kimchi.KimchiTradeUser;
 import joyyir.boddari.domain.kimchi.TradeStatus;
+import joyyir.boddari.domain.user.UserAndTradeHistory;
 import joyyir.boddari.interfaces.exception.BadRequestException;
 import joyyir.boddari.interfaces.handler.BoddariBotHandler;
+import joyyir.boddari.service.KimchiTradeHistoryService;
 import joyyir.boddari.service.KimchiTradeUserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TradeController implements TelegramCommandController {
     private final KimchiTradeUserService userService;
+    private final KimchiTradeHistoryService tradeHistoryService;
 
     @Override
     public void runCommand(Long chatId, String[] commands, BoddariBotHandler botHandler) throws BadRequestException {
@@ -40,10 +43,14 @@ public class TradeController implements TelegramCommandController {
     private void start(BoddariBotHandler botHandler, Long chatId, String userId) throws BadRequestException {
         TradeStatus targetStatus = TradeStatus.START;
         KimchiTradeUser user = findUser(userId, targetStatus);
-        if (canStart(user)) {
-            KimchiTradeUser savedUser = userService.setUserTradeStatus(user, targetStatus);
+        if (user.getTradeStatus() == TradeStatus.STOP) {
+            UserAndTradeHistory userAndTradeHistory = userService.startNewTrade(userId);
+            botHandler.sendMessage(chatId, "트레이드 상태가 " + userAndTradeHistory.getUser().getTradeStatus().name() + "으로 변경되었습니다.");
+        } else if (user.getTradeStatus() == TradeStatus.PAUSE) {
+            KimchiTradeUser savedUser = userService.setUserTradeStatus(user, TradeStatus.START, null);
             botHandler.sendMessage(chatId, "트레이드 상태가 " + savedUser.getTradeStatus().name() + "으로 변경되었습니다.");
         }
+        throw new RuntimeException("유효하지 않은 트레이드 상태입니다. userId: " + userId + ", tradeStatus: " + user.getTradeStatus());
     }
 
     private void resume(BoddariBotHandler botHandler, Long chatId, String userId) {
@@ -64,9 +71,5 @@ public class TradeController implements TelegramCommandController {
             throw new BadRequestException("이미 " + targetStatus.name() + " 상태입니다.");
         }
         return user;
-    }
-
-    private boolean canStart(KimchiTradeUser user) {
-        return true; // TODO : jyjang - develop
     }
 }
