@@ -43,17 +43,21 @@ public class TradeController implements TelegramCommandController {
     private void start(BoddariBotHandler botHandler, Long chatId, String userId) throws BadRequestException {
         TradeStatus targetStatus = TradeStatus.START;
         KimchiTradeUser user = findUser(userId, targetStatus);
-        if (user.getTradeStatus() == TradeStatus.STOP) {
-            UserAndTradeHistory userAndTradeHistory = userService.startNewTrade(userId);
-            botHandler.sendMessage(chatId, "트레이드 상태가 " + userAndTradeHistory.getUser().getTradeStatus().name() + "으로 변경되었습니다.");
-        } else if (user.getTradeStatus() == TradeStatus.PAUSE) {
-            KimchiTradeUser savedUser = userService.setUserTradeStatus(user, TradeStatus.START, null);
-            botHandler.sendMessage(chatId, "트레이드 상태가 " + savedUser.getTradeStatus().name() + "으로 변경되었습니다.");
+        if (user.getTradeStatus() != TradeStatus.STOP) {
+            throw new BadRequestException("start 명령은 stop 상태일 때만 할 수 있습니다.");
         }
-        throw new RuntimeException("유효하지 않은 트레이드 상태입니다. userId: " + userId + ", tradeStatus: " + user.getTradeStatus());
+        UserAndTradeHistory userAndTradeHistory = userService.startNewTrade(userId);
+        botHandler.sendMessage(chatId, "트레이드 상태가 " + userAndTradeHistory.getUser().getTradeStatus().name() + "으로 변경되었습니다.");
     }
 
-    private void resume(BoddariBotHandler botHandler, Long chatId, String userId) {
+    private void resume(BoddariBotHandler botHandler, Long chatId, String userId) throws BadRequestException {
+        TradeStatus targetStatus = TradeStatus.START;
+        KimchiTradeUser user = findUser(userId, targetStatus);
+        if (user.getTradeStatus() != TradeStatus.PAUSE) {
+            throw new BadRequestException("resume 명령은 pause 상태일 때만 할 수 있습니다.");
+        }
+        KimchiTradeUser savedUser = userService.setUserTradeStatus(user, TradeStatus.START, null);
+        botHandler.sendMessage(chatId, "트레이드 상태가 " + savedUser.getTradeStatus().name() + "으로 변경되었습니다.");
     }
 
     private void stop(BoddariBotHandler botHandler, Long chatId, String userId) {
