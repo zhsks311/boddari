@@ -6,6 +6,7 @@ import joyyir.boddari.domain.exchange.OrderDetail;
 import joyyir.boddari.domain.exchange.OrderRepository;
 import joyyir.boddari.domain.exchange.OrderStatus;
 import joyyir.boddari.infrastructure.upbit.dto.OrderDTO;
+import joyyir.boddari.infrastructure.upbit.dto.TradeDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -15,7 +16,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -57,6 +61,22 @@ public class UpbitOrderRepository implements OrderRepository {
         OrderStatus orderStatus = order.getState().equalsIgnoreCase("done")
             || (order.getState().equalsIgnoreCase("cancel") && order.getLocked().doubleValue() < 1)
             ? OrderStatus.COMPLETED : OrderStatus.UNKNOWN;
-        return new OrderDetail(orderStatus, order.getExecutedVolume());
+        if (orderStatus != OrderStatus.COMPLETED) {
+            return new OrderDetail(orderStatus, null, null, null);
+        }
+        return new OrderDetail(orderStatus,
+                               order.getExecutedVolume(),
+                               getAveragePrice(order.getTrades()),
+                               order.getPaidFee());
+    }
+
+    private BigDecimal getAveragePrice(List<TradeDTO> trades) {
+        BigDecimal sumAmount = trades.stream()
+                                     .map(x -> x.getPrice().multiply(x.getVolume()))
+                                     .reduce(new BigDecimal(0L), BigDecimal::add);
+        BigDecimal sumVolume = trades.stream()
+                                     .map(TradeDTO::getVolume)
+                                     .reduce(new BigDecimal(0L), BigDecimal::add);
+        return sumAmount.divide(sumVolume, 0, RoundingMode.FLOOR);
     }
 }

@@ -10,4 +10,6 @@ import java.math.BigDecimal;
 public class OrderDetail {
     private OrderStatus orderStatus;
     private BigDecimal orderQty;
+    private BigDecimal averagePrice;
+    private BigDecimal fee;
 }

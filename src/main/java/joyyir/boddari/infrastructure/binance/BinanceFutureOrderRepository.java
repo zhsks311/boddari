@@ -15,6 +15,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -57,6 +58,14 @@ public class BinanceFutureOrderRepository implements OrderRepository {
             throw new RuntimeException("response: " + response.toString());
         }
         OrderStatus orderStatus = order.getStatus().equals("FILLED") ? OrderStatus.COMPLETED : OrderStatus.UNKNOWN;
-        return new OrderDetail(orderStatus, order.getExecutedQty());
+        if (orderStatus != OrderStatus.COMPLETED) {
+            return new OrderDetail(orderStatus, null, null, null);
+        }
+        return new OrderDetail(orderStatus,
+                               order.getExecutedQty(),
+                               order.getAvgPrice(),
+                               order.getExecutedQty()
+                                    .multiply(order.getAvgPrice())
+                                    .multiply(new BigDecimal("0.0004"))); // VIP 0 레벨에서 Taker의 수수료는 0.04%
     }
 }

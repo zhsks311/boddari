@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Data
 public class OrderDTO {
@@ -55,4 +56,7 @@ public class OrderDTO {
 
     @JsonProperty("trades_count")
     private Integer tradesCount;
+
+    @JsonProperty("trades")
+    private List<TradeDTO> trades;
 }
