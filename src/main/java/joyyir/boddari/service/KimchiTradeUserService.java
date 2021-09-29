@@ -44,4 +44,9 @@ public class KimchiTradeUserService {
     public void delete(KimchiTradeUser user) {
         kimchiTradeUserRepository.delete(user);
     }
+
+    public KimchiTradeUser setUserTradeStatus(KimchiTradeUser user, TradeStatus status) {
+        user.setTradeStatus(status);
+        return kimchiTradeUserRepository.save(user);
+    }
 }

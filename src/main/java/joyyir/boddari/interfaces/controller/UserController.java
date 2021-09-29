@@ -34,32 +34,29 @@ public class UserController implements TelegramCommandController {
         }
     }
 
-    private void register(BoddariBotHandler botHandler, Long chatId, String userId) {
+    private void register(BoddariBotHandler botHandler, Long chatId, String userId) throws BadRequestException {
+        KimchiTradeUser user = userService.findUserById(userId);
+        if (user != null) {
+            throw new BadRequestException("이미 등록된 유저입니다.");
+        }
+        KimchiTradeUser newUser = userService.register(userId);
+        botHandler.sendMessage(chatId, "유저 등록 성공. 환영합니다. " + newUser);
+    }
+
+    private void unregister(BoddariBotHandler botHandler, Long chatId, String userId) throws BadRequestException {
         KimchiTradeUser user = userService.findUserById(userId);
         if (user == null) {
-            KimchiTradeUser newUser = userService.register(userId);
-            botHandler.sendMessage(chatId, "유저 등록 성공. 환영합니다. " + newUser);
-            return;
+            throw new BadRequestException("등록되지 않은 유저입니다.");
         }
-        botHandler.sendMessage(chatId, "이미 등록된 유저입니다.");
+        userService.delete(user);
+        botHandler.sendMessage(chatId, "유저 제거 성공. 이용해주셔서 감사합니다.");
     }
 
-    private void unregister(BoddariBotHandler botHandler, Long chatId, String userId) {
+    private void info(BoddariBotHandler botHandler, Long chatId, String userId) throws BadRequestException {
         KimchiTradeUser user = userService.findUserById(userId);
-        if (user != null) {
-            userService.delete(user);
-            botHandler.sendMessage(chatId, "유저 제거 성공. 이용해주셔서 감사합니다.");
-            return;
+        if (user == null) {
+            throw new BadRequestException("등록되지 않은 유저입니다.");
         }
-        botHandler.sendMessage(chatId, "등록되지 않은 유저입니다.");
-    }
-
-    private void info(BoddariBotHandler botHandler, Long chatId, String userId) {
-        KimchiTradeUser user = userService.findUserById(userId);
-        String message = "등록되지 않은 유저입니다.";
-        if (user != null) {
-            message = "유저 정보: " + user;
-        }
-        botHandler.sendMessage(chatId, message);
+        botHandler.sendMessage(chatId, "유저 정보: " + user);
     }
 }

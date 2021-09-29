@@ -15,6 +15,7 @@ import joyyir.boddari.domain.kimchi.KimchiTradeStatus;
 import joyyir.boddari.domain.kimchi.KimchiTradeUser;
 import joyyir.boddari.domain.kimchi.TradeDecision;
 import joyyir.boddari.domain.kimchi.TradeResult;
+import joyyir.boddari.domain.kimchi.TradeStatus;
 import joyyir.boddari.domain.kimchi.strategy.BuyStrategy;
 import joyyir.boddari.domain.kimchi.strategy.DummyBuyStrategy;
 import joyyir.boddari.domain.kimchi.strategy.DummySellStrategy;
@@ -45,7 +46,7 @@ public class KimchiTradeService {
     @Transactional
     public void kimchiTrade(String userId, BigDecimal upbitBuyLimitKrw) {
         KimchiTradeUser user = kimchiTradeUserService.findUserById(userId);
-        if (user == null) {
+        if (user == null || user.getTradeStatus() != TradeStatus.START) {
             return;
         }
         List<KimchiTradeHistory> tradeHistory = tradeHistoryService.findTradeHistory(user.getUserId(), user.getCurrentTradeId());
