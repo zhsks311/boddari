@@ -1,12 +1,17 @@
 package joyyir.boddari.domain.kimchi;
 
 import lombok.Getter;
+import lombok.Setter;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Getter
+@Setter
 @Entity
 @Table(name = "kimchi_trade_user")
 public class KimchiTradeUser {
@@ -15,11 +20,24 @@ public class KimchiTradeUser {
 
     private String currentTradeId;
 
+    @Enumerated(value = EnumType.STRING)
+    private TradeStatus tradeStatus;
+
     public KimchiTradeUser() {
     }
 
-    public KimchiTradeUser(String userId, String currentTradeId) {
+    public KimchiTradeUser(String userId, String currentTradeId, TradeStatus tradeStatus) {
         this.userId = userId;
         this.currentTradeId = currentTradeId;
+        this.tradeStatus = tradeStatus;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+            .append("userId", userId)
+            .append("currentTradeId", currentTradeId)
+            .append("tradeStatus", tradeStatus)
+            .toString();
     }
 }

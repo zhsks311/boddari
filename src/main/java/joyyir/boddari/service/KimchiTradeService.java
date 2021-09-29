@@ -46,7 +46,10 @@ public class KimchiTradeService {
 
     @Transactional
     public void kimchiTrade(String userId, BigDecimal upbitBuyLimitKrw) {
-        KimchiTradeUser user = kimchiTradeUserService.findUserOrElseRegister(userId);
+        KimchiTradeUser user = kimchiTradeUserService.findUserById(userId);
+        if (user == null) {
+            return;
+        }
         List<KimchiTradeHistory> tradeHistory = findTradeHistory(user.getUserId(), user.getCurrentTradeId());
 
         try {
@@ -57,7 +60,9 @@ public class KimchiTradeService {
                 return;
             }
             if (lastHistory.getStatus() == KimchiTradeStatus.FINISHED) {
-                firstHistory = lastHistory = kimchiTradeUserService.saveUserAndStartNewTrade(userId).getTradeHistory();
+                KimchiTradeHistory startedTradeHistory = kimchiTradeUserService.startNewTrade(userId)
+                                                                               .getTradeHistory();
+                firstHistory = lastHistory = startedTradeHistory;
             }
             log.info("[jyjang] " + firstHistory.getTimestamp() + "에 시작된 trade의(tradeId: " + user.getCurrentTradeId() + ") 현재 상태: " + lastHistory.getStatus().name());
             if (lastHistory.getStatus() == KimchiTradeStatus.WAITING) {

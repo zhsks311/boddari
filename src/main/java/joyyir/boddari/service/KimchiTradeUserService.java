@@ -5,6 +5,7 @@ import joyyir.boddari.domain.kimchi.KimchiTradeHistoryRepository;
 import joyyir.boddari.domain.kimchi.KimchiTradeStatus;
 import joyyir.boddari.domain.kimchi.KimchiTradeUser;
 import joyyir.boddari.domain.kimchi.KimchiTradeUserRepository;
+import joyyir.boddari.domain.kimchi.TradeStatus;
 import joyyir.boddari.domain.user.UserAndTradeHistory;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,16 +19,31 @@ public class KimchiTradeUserService {
     private final KimchiTradeUserRepository kimchiTradeUserRepository;
     private final KimchiTradeHistoryRepository kimchiTradeHistoryRepository;
 
-    public KimchiTradeUser findUserOrElseRegister(String userId) {
+    public KimchiTradeUser findUserById(String userId) {
         return kimchiTradeUserRepository.findById(userId)
-                                        .orElseGet(() -> saveUserAndStartNewTrade(userId).getUser());
+                                        .orElse(null);
     }
 
-    public UserAndTradeHistory saveUserAndStartNewTrade(String userId) {
+    public UserAndTradeHistory startNewTrade(String userId) {
+        KimchiTradeUser user = findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("등록되지 않은 유저입니다. userId:" + userId);
+        }
         String newTradeId = UUID.randomUUID().toString();
-        KimchiTradeUser user = new KimchiTradeUser(userId, newTradeId);
+
+        user.setCurrentTradeId(newTradeId);
+        user.setTradeStatus(TradeStatus.START);
         KimchiTradeUser savedUser = kimchiTradeUserRepository.save(user);
+
         KimchiTradeHistory savedTradeHistory = kimchiTradeHistoryRepository.save(new KimchiTradeHistory(null, userId, newTradeId, LocalDateTime.now(), KimchiTradeStatus.WAITING, null, null));
         return new UserAndTradeHistory(savedUser, savedTradeHistory);
+    }
+
+    public KimchiTradeUser register(String userId) {
+        return kimchiTradeUserRepository.save(new KimchiTradeUser(userId, null, TradeStatus.STOP));
+    }
+
+    public void delete(KimchiTradeUser user) {
+        kimchiTradeUserRepository.delete(user);
     }
 }

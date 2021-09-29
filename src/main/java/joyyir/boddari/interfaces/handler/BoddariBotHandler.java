@@ -41,13 +41,13 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
                 String[] commands = update.getMessage().getText().split(" ");
                 switch (commands[0]) {
                     case "/user":
-                        this.userController.runCommand(chatId, commands);
+                        this.userController.runCommand(chatId, commands, this);
                         break;
                     case "/trade":
-                        this.tradeController.runCommand(chatId, commands);
+                        this.tradeController.runCommand(chatId, commands, this);
                         break;
                     default:
-                        throw new BadRequestException("잘못된 형식의 명령입니다. 명령어를 다시 확인해주세요.");
+                        throw new BadRequestException("지원하지 않는 명령어입니다.");
                 }
             } catch (NumberFormatException e) {
                 sendMessage(chatId, "숫자 형식이 올바르지 않습니다.");
@@ -60,7 +60,7 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
         }
     }
 
-    private void sendMessage(Long chatId, String message) {
+    public void sendMessage(Long chatId, String message) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.enableMarkdown(false);
         sendMessage.setChatId(String.valueOf(chatId));
