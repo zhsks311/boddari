@@ -44,6 +44,6 @@ public class KimchiTradeHistoryService {
     }
 
     public List<KimchiTradeHistory> findAllByUserIdAndTimestampAfter(String userId, LocalDateTime timeAfter) {
-        return this.kimchiTradeHistoryRepository.findAllByUserIdAndTimestampAfter(userId, timeAfter);
+        return this.kimchiTradeHistoryRepository.findAllByUserIdAndTimestampAfterOrderByTimestampAsc(userId, timeAfter);
     }
 }

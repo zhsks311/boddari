@@ -148,6 +148,9 @@ public class TradeController implements TelegramCommandController {
     }
 
     private String toTradeHistoryString(List<KimchiTradeHistory> tradeHistory) {
+        if (tradeHistory == null || tradeHistory.isEmpty()) {
+            return "내역 없음";
+        }
         return tradeHistory.stream()
                            .map(x -> {
                                if (x.getStatus() == KimchiTradeStatus.WAITING || x.getStatus() == KimchiTradeStatus.ERROR) {

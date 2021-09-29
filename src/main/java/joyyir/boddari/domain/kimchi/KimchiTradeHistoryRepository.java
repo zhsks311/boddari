@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface KimchiTradeHistoryRepository extends JpaRepository<KimchiTradeHistory, Long> {
     List<KimchiTradeHistory> findAllByUserIdAndTradeIdOrderByTimestampDesc(String userId, String tradeId);
-    List<KimchiTradeHistory> findAllByUserIdAndTimestampAfter(String userId, LocalDateTime timeAfter);
+    List<KimchiTradeHistory> findAllByUserIdAndTimestampAfterOrderByTimestampAsc(String userId, LocalDateTime timeAfter);
 }
