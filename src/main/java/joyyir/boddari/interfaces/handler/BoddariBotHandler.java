@@ -48,7 +48,7 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
                         break;
                     case "/help":
                         String message =
-                            "처음 오신 분은 /user register 명령으로 유저 등록해주세요.\n" +
+                            "처음 오신 분은 /user register 명령으로 유저 등록하시고 /trade start 명령으로 트레이딩을 시작하세요.\n" +
                             "\n" +
                             "/user register : 유저 등록\n" +
                             "/user unregister : 유저 정보 제거\n" +
@@ -58,6 +58,7 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
                             "/trade stop : 현재 트레이딩 종료\n" +
                             "/trade pause : 현재 트레이딩 일시 중지\n" +
                             "/trade resume : 일시 중지된 트레이딩 재개\n" +
+                            "/trade status : 현재 진행 중인 트레이딩 상태 확인\n" +
                             "\n" +
                             "문의 사항은 joyyir@naver.com으로 보내주세요.\n" +
                             "";

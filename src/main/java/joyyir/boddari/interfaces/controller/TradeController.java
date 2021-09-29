@@ -1,5 +1,7 @@
 package joyyir.boddari.interfaces.controller;
 
+import joyyir.boddari.domain.kimchi.KimchiTradeHistory;
+import joyyir.boddari.domain.kimchi.KimchiTradeStatus;
 import joyyir.boddari.domain.kimchi.KimchiTradeUser;
 import joyyir.boddari.domain.kimchi.TradeStatus;
 import joyyir.boddari.domain.user.UserAndTradeHistory;
@@ -9,7 +11,13 @@ import joyyir.boddari.service.KimchiTradeHistoryService;
 import joyyir.boddari.service.KimchiTradeUserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.math.RoundingMode;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @AllArgsConstructor
@@ -21,7 +29,16 @@ public class TradeController implements TelegramCommandController {
     @Override
     public void runCommand(Long chatId, String[] commands, BoddariBotHandler botHandler) throws BadRequestException {
         String userId = String.valueOf(chatId);
-
+        if (commands.length < 2) {
+            String helpMessage =
+                "/trade start : 새로운 트레이딩 시작\n" +
+                "/trade stop : 현재 트레이딩 종료\n" +
+                "/trade pause : 현재 트레이딩 일시 중지\n" +
+                "/trade resume : 일시 중지된 트레이딩 재개\n" +
+                "/trade status : 현재 진행 중인 트레이딩 상태 확인";
+            botHandler.sendMessage(chatId, helpMessage);
+            return;
+        }
         switch (commands[1]) {
             case "start":
                 start(botHandler, chatId, userId);
@@ -34,6 +51,9 @@ public class TradeController implements TelegramCommandController {
                 break;
             case "pause":
                 pause(botHandler, chatId, userId);
+                break;
+            case "status":
+                status(botHandler, chatId, userId);
                 break;
             default:
                 throw new BadRequestException("지원하지 않는 명령어입니다.");
@@ -78,6 +98,41 @@ public class TradeController implements TelegramCommandController {
         }
         KimchiTradeUser savedUser = userService.setUserTradeStatus(user, targetStatus, user.getCurrentTradeId());
         notifyTradeStatusChange(botHandler, chatId, savedUser);
+    }
+
+    private void status(BoddariBotHandler botHandler, Long chatId, String userId) {
+        KimchiTradeUser user = userService.findUserById(userId);
+        if (StringUtils.isEmpty(user.getCurrentTradeId())) {
+            botHandler.sendMessage(chatId, "진행 중인 트레이드가 없습니다. 트레이드 상태: " + user.getTradeStatus().name());
+            return;
+        }
+        List<KimchiTradeHistory> tradeHistory = tradeHistoryService.findTradeHistory(userId, user.getCurrentTradeId());
+        Collections.reverse(tradeHistory);
+        String histories = tradeHistory.stream()
+                                       .map(x -> {
+                                           if (x.getStatus() == KimchiTradeStatus.WAITING || x.getStatus() == KimchiTradeStatus.ERROR) {
+                                               return String.format("%s | %s",
+                                                                    x.getTimestamp(), x.getStatus());
+                                           } else if (x.getStatus() == KimchiTradeStatus.STARTED) {
+                                               return String.format("%s | %s | %s | 김프 %.2f%% | 업비트 평단 %s원에 %s개 매수 | 바이낸스 평단 %s달러에 %s개 숏",
+                                                                    x.getTimestamp(), x.getStatus(), x.getCurrencyType(), x.getKimchiPremium(), x.getBuyAvgPrice().setScale(0, RoundingMode.FLOOR),
+                                                                    x.getBuyQuantity(), x.getShortAvgPrice().setScale(4, RoundingMode.FLOOR), x.getShortQuantity());
+                                           } else if (x.getStatus() == KimchiTradeStatus.FINISHED) {
+                                               return String.format("%s | %s | %s | 김프 %.2f%% | 업비트 평단 %s원에 %s개 매도 | 바이낸스 평단 %s달러에 %s개 롱 | 이익 %s원 (%.2f%%)",
+                                                                    x.getTimestamp(), x.getStatus(), x.getCurrencyType(), x.getKimchiPremium(), x.getBuyAvgPrice().setScale(0, RoundingMode.FLOOR),
+                                                                    x.getBuyQuantity(), x.getShortAvgPrice().setScale(4, RoundingMode.FLOOR), x.getShortQuantity(), x.getProfitAmount(), x.getProfitRate());
+                                           } else {
+                                               return String.format("%s | %s | unknown",
+                                                                    x.getTimestamp(), x.getStatus());
+                                           }
+                                       })
+                                       .collect(Collectors.joining("\n"));
+        botHandler.sendMessage(chatId,
+                               "현재 트레이드 id: " + user.getCurrentTradeId() + "\n" +
+                               "현재 트레이드 상태: " + tradeHistory.get(tradeHistory.size() - 1).getStatus() + "\n" +
+                               "\n" +
+                               "현재 트레이드 히스토리\n" +
+                               histories);
     }
 
     private KimchiTradeUser findUser(String userId, TradeStatus targetStatus) throws BadRequestException {

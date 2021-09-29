@@ -18,7 +18,14 @@ public class UserController implements TelegramCommandController {
     @Override
     public void runCommand(Long chatId, String[] commands, BoddariBotHandler botHandler) throws BadRequestException {
         String userId = String.valueOf(chatId);
-
+        if (commands.length < 2) {
+            String helpMessage =
+                "/user register : 유저 등록\n" +
+                "/user unregister : 유저 정보 제거\n" +
+                "/user info : 유저 정보 조회";
+            botHandler.sendMessage(chatId, helpMessage);
+            return;
+        }
         switch (commands[1]) {
             case "register":
                 register(botHandler, chatId, userId);
