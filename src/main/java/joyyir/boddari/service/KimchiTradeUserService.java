@@ -41,11 +41,9 @@ public class KimchiTradeUserService {
         kimchiTradeUserRepository.delete(user);
     }
 
-    public KimchiTradeUser setUserTradeStatus(KimchiTradeUser user, TradeStatus status, String newTradeId) {
+    public KimchiTradeUser setUserTradeStatus(KimchiTradeUser user, TradeStatus status, String tradeId) {
         user.setTradeStatus(status);
-        if (newTradeId != null) {
-            user.setCurrentTradeId(newTradeId);
-        }
+        user.setCurrentTradeId(tradeId);
         return kimchiTradeUserRepository.save(user);
     }
 }
