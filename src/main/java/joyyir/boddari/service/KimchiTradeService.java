@@ -144,7 +144,7 @@ public class KimchiTradeService {
                                                         .filter(x -> x.getStatus() == KimchiTradeStatus.STARTED)
                                                         .findFirst()
                                                         .orElse(null);
-            KimchiTradeProfit profit = calculateProfit(tradeResult, buyHistory);
+            KimchiTradeProfit profit = calculateProfit(tradeResult, buyHistory, usdPriceRepository.getUsdPriceKrw());
             kimchiTradeHistoryRepository.save(new KimchiTradeHistory(null,
                                                                      userId,
                                                                      tradeId,
@@ -164,7 +164,7 @@ public class KimchiTradeService {
         }
     }
 
-    KimchiTradeProfit calculateProfit(TradeResult tradeResult, KimchiTradeHistory buyHistory) {
+    KimchiTradeProfit calculateProfit(TradeResult tradeResult, KimchiTradeHistory buyHistory, BigDecimal usdPriceKrw) {
         if (buyHistory == null) {
             return null;
         }
@@ -182,7 +182,6 @@ public class KimchiTradeService {
         BigDecimal binanceLongProfit = binanceLongOrderDetail.getAveragePrice()
                                                              .multiply(binanceLongOrderDetail.getOrderQty())
                                                              .subtract(binanceLongOrderDetail.getFee());
-        BigDecimal usdPriceKrw = usdPriceRepository.getUsdPriceKrw();
         BigDecimal profitAmount = upbitSellProfit.subtract(upbitBuyCost)
                                                  .add(binanceShortCost.subtract(binanceLongProfit)
                                                                       .multiply(usdPriceKrw))

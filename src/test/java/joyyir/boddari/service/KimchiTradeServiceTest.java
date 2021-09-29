@@ -2,28 +2,22 @@ package joyyir.boddari.service;
 
 import joyyir.boddari.domain.exchange.OrderDetail;
 import joyyir.boddari.domain.exchange.OrderStatus;
-import joyyir.boddari.domain.exchange.UsdPriceRepository;
 import joyyir.boddari.domain.kimchi.KimchiTradeHistory;
 import joyyir.boddari.domain.kimchi.KimchiTradeProfit;
 import joyyir.boddari.domain.kimchi.TradeResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doReturn;
 
 class KimchiTradeServiceTest {
     private KimchiTradeService service;
 
     @BeforeEach
     void setUp() {
-        UsdPriceRepository usdPriceRepository = Mockito.mock(UsdPriceRepository.class);
-        doReturn(new BigDecimal("1185.69")).when(usdPriceRepository)
-                                           .getUsdPriceKrw();
-        this.service = new KimchiTradeService(null, null, null, null, null, null, null, usdPriceRepository, null);
+        this.service = new KimchiTradeService(null, null, null, null, null, null, null, null, null);
     }
 
     @Test
@@ -51,7 +45,7 @@ class KimchiTradeServiceTest {
                                                                new BigDecimal("0.16434173"),
                                                                null,
                                                                null);
-        KimchiTradeProfit kimchiTradeProfit = this.service.calculateProfit(tradeResult, buyHistory);
+        KimchiTradeProfit kimchiTradeProfit = this.service.calculateProfit(tradeResult, buyHistory, new BigDecimal("1185.69"));
         assertEquals(new BigDecimal(6898), kimchiTradeProfit.getProfitAmount());
         assertEquals(new BigDecimal("0.70"), kimchiTradeProfit.getProfitRate());
     }
