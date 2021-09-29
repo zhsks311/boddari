@@ -2,9 +2,9 @@ spring.main.web-application-type: NONE
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/boddari
-    username: root
-    password: password
+    url: jdbc:mysql://your-mysql-url
+    username: your-username
+    password: your-password
   jpa:
     hibernate:
       ddl-auto: update
@@ -24,14 +24,14 @@ logging:
 
 constant:
   upbit:
-    access-key: 3dx505OKm6I1AaAo8Eu0LSVORa1HJyxd3M0JKZc9
-    secret-key: xxuJtNxIOYPFopvyqfiRMfn2xek4WpT6RJHmmRF0
+    access-key: your-access-key
+    secret-key: your-secret-key
   huobi:
-    access-key: a8a59575-uymylwhfeg-82263b6d-32376
-    secret-key: e0ef1efa-a9370669-b200c1d2-1a599
+    access-key: your-access-key
+    secret-key: your-secret-key
   binance:
-    access-key: EDwgbfQ2ZZaRbi3w7pLmvtoRvgy83EeSf3M5VBmfbX7iix6zCTsd4Iz4o30HEpHk
-    secret-key: 1uuFIiztcBvM18U83xcDvgq0art62Nm6UmhoRHo9xEm5IP7HMUyk1iZPsmnXpyzc
+    access-key: your-access-key
+    secret-key: your-secret-key
   telegram-boddaribot:
-    access-token: 1633252158:AAE5FoLmKzqNcIswoOU202RDC49ytC-RrmE
-    chat-id: 1080798457
+    access-token: your-access-token
+    chat-id: your-chat-id
