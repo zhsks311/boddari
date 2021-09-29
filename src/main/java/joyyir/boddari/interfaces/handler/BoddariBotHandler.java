@@ -46,6 +46,23 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
                     case "/trade":
                         this.tradeController.runCommand(chatId, commands, this);
                         break;
+                    case "/help":
+                        String message =
+                            "처음 오신 분은 /user register 명령으로 유저 등록해주세요.\n" +
+                            "\n" +
+                            "/user register : 유저 등록\n" +
+                            "/user unregister : 유저 정보 제거\n" +
+                            "/user info : 유저 정보 조회\n" +
+                            "\n" +
+                            "/trade start : 새로운 트레이딩 시작\n" +
+                            "/trade stop : 현재 트레이딩 종료\n" +
+                            "/trade pause : 현재 트레이딩 일시 중지\n" +
+                            "/trade resume : 일시 중지된 트레이딩 재개\n" +
+                            "\n" +
+                            "문의 사항은 joyyir@naver.com으로 보내주세요.\n" +
+                            "";
+                        sendMessage(chatId, message);
+                        break;
                     default:
                         throw new BadRequestException("지원하지 않는 명령어입니다.");
                 }
