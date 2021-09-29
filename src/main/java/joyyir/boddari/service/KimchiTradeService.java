@@ -14,7 +14,6 @@ import joyyir.boddari.domain.kimchi.KimchiTradeHistoryRepository;
 import joyyir.boddari.domain.kimchi.KimchiTradeProfit;
 import joyyir.boddari.domain.kimchi.KimchiTradeStatus;
 import joyyir.boddari.domain.kimchi.KimchiTradeUser;
-import joyyir.boddari.domain.kimchi.KimchiTradeUserRepository;
 import joyyir.boddari.domain.kimchi.TradeDecision;
 import joyyir.boddari.domain.kimchi.TradeResult;
 import joyyir.boddari.domain.kimchi.strategy.BuyStrategy;
@@ -30,13 +29,12 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class KimchiTradeService {
-    private final KimchiTradeUserRepository kimchiTradeUserRepository;
+    private final KimchiTradeUserService kimchiTradeUserService;
     private final KimchiTradeHistoryRepository kimchiTradeHistoryRepository;
     private final KimchiPremiumService kimchiPremiumService;
     private final TradeRepository upbitTradeRepository;
@@ -48,7 +46,7 @@ public class KimchiTradeService {
 
     @Transactional
     public void kimchiTrade(String userId, BigDecimal upbitBuyLimitKrw) {
-        KimchiTradeUser user = findUser(userId);
+        KimchiTradeUser user = kimchiTradeUserService.findUserOrElseRegister(userId);
         List<KimchiTradeHistory> tradeHistory = findTradeHistory(user.getUserId(), user.getCurrentTradeId());
 
         try {
@@ -59,7 +57,7 @@ public class KimchiTradeService {
                 return;
             }
             if (lastHistory.getStatus() == KimchiTradeStatus.FINISHED) {
-                firstHistory = lastHistory = startNewTrade(userId);
+                firstHistory = lastHistory = kimchiTradeUserService.saveUserAndStartNewTrade(userId).getTradeHistory();
             }
             log.info("[jyjang] " + firstHistory.getTimestamp() + "에 시작된 trade의(tradeId: " + user.getCurrentTradeId() + ") 현재 상태: " + lastHistory.getStatus().name());
             if (lastHistory.getStatus() == KimchiTradeStatus.WAITING) {
@@ -80,29 +78,8 @@ public class KimchiTradeService {
         }
     }
 
-    private KimchiTradeUser findUser(String userId) {
-        return kimchiTradeUserRepository.findById(userId)
-                                        .orElseGet(() -> registerNewUser(userId));
-    }
-
     private List<KimchiTradeHistory> findTradeHistory(String userId, String tradeId) {
         return kimchiTradeHistoryRepository.findAllByUserIdAndTradeIdOrderByTimestampDesc(userId, tradeId);
-    }
-
-    private KimchiTradeHistory startNewTrade(String userId) {
-        String newTradeId = UUID.randomUUID().toString();
-        kimchiTradeUserRepository.save(new KimchiTradeUser(userId, newTradeId));
-        KimchiTradeHistory tradeHistory = new KimchiTradeHistory(null, userId, newTradeId, LocalDateTime.now(), KimchiTradeStatus.WAITING, null, null);
-        kimchiTradeHistoryRepository.save(tradeHistory);
-        return tradeHistory;
-    }
-
-    private KimchiTradeUser registerNewUser(String userId) {
-        String newTradeId = UUID.randomUUID().toString();
-        KimchiTradeUser user = new KimchiTradeUser(userId, newTradeId);
-        kimchiTradeUserRepository.save(user);
-        kimchiTradeHistoryRepository.save(new KimchiTradeHistory(null, userId, newTradeId, LocalDateTime.now(), KimchiTradeStatus.WAITING, null, null));
-        return user;
     }
 
     private void checkBuyTimingAndTrade(String userId, String tradeId, BigDecimal upbitBuyLimitKrw) {
