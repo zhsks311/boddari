@@ -10,7 +10,6 @@ import joyyir.boddari.domain.exchange.OrderStatus;
 import joyyir.boddari.domain.exchange.TradeRepository;
 import joyyir.boddari.domain.exchange.UsdPriceRepository;
 import joyyir.boddari.domain.kimchi.KimchiTradeHistory;
-import joyyir.boddari.domain.kimchi.KimchiTradeHistoryRepository;
 import joyyir.boddari.domain.kimchi.KimchiTradeProfit;
 import joyyir.boddari.domain.kimchi.KimchiTradeStatus;
 import joyyir.boddari.domain.kimchi.KimchiTradeUser;
@@ -27,7 +26,6 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -35,7 +33,7 @@ import java.util.List;
 @AllArgsConstructor
 public class KimchiTradeService {
     private final KimchiTradeUserService kimchiTradeUserService;
-    private final KimchiTradeHistoryRepository kimchiTradeHistoryRepository;
+    private final KimchiTradeHistoryService tradeHistoryService;
     private final KimchiPremiumService kimchiPremiumService;
     private final TradeRepository upbitTradeRepository;
     private final OrderRepository upbitOrderRepository;
@@ -50,7 +48,7 @@ public class KimchiTradeService {
         if (user == null) {
             return;
         }
-        List<KimchiTradeHistory> tradeHistory = findTradeHistory(user.getUserId(), user.getCurrentTradeId());
+        List<KimchiTradeHistory> tradeHistory = tradeHistoryService.findTradeHistory(user.getUserId(), user.getCurrentTradeId());
 
         try {
             KimchiTradeHistory firstHistory = tradeHistory.get(tradeHistory.size() - 1);
@@ -72,19 +70,9 @@ public class KimchiTradeService {
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            kimchiTradeHistoryRepository.save(new KimchiTradeHistory(null,
-                                                                     userId,
-                                                                     user.getCurrentTradeId(),
-                                                                     LocalDateTime.now(),
-                                                                     KimchiTradeStatus.ERROR,
-                                                                     null,
-                                                                     null));
+            tradeHistoryService.saveNewHistory(userId, user.getCurrentTradeId(), KimchiTradeStatus.ERROR);
             boddariBot.sendMessage(e.getMessage());
         }
-    }
-
-    private List<KimchiTradeHistory> findTradeHistory(String userId, String tradeId) {
-        return kimchiTradeHistoryRepository.findAllByUserIdAndTradeIdOrderByTimestampDesc(userId, tradeId);
     }
 
     private void checkBuyTimingAndTrade(String userId, String tradeId, BigDecimal upbitBuyLimitKrw) {
@@ -93,21 +81,7 @@ public class KimchiTradeService {
         if (decision.isTrade()) {
             log.info("[jyjang] 조건이 충족되어 김프 거래를 시작합니다. {}", decision);
             TradeResult tradeResult = kimchiTradeBuy(decision.getCurrencyType(), upbitBuyLimitKrw);
-            kimchiTradeHistoryRepository.save(new KimchiTradeHistory(null,
-                                                                     userId,
-                                                                     tradeId,
-                                                                     LocalDateTime.now(),
-                                                                     KimchiTradeStatus.STARTED,
-                                                                     decision.getCurrencyType(),
-                                                                     decision.getKimchiPremium().doubleValue(),
-                                                                     tradeResult.getBuyOrderDetail().getOrderQty(),
-                                                                     tradeResult.getBuyOrderDetail().getAveragePrice(),
-                                                                     tradeResult.getBuyOrderDetail().getFee(),
-                                                                     tradeResult.getShortOrderDetail().getOrderQty(),
-                                                                     tradeResult.getShortOrderDetail().getAveragePrice(),
-                                                                     tradeResult.getShortOrderDetail().getFee(),
-                                                                     null,
-                                                                     null));
+            tradeHistoryService.saveNewHistory(userId, tradeId, KimchiTradeStatus.STARTED, decision, tradeResult, null);
         }
     }
 
@@ -127,22 +101,7 @@ public class KimchiTradeService {
                                                         .findFirst()
                                                         .orElse(null);
             KimchiTradeProfit profit = calculateProfit(tradeResult, buyHistory, usdPriceRepository.getUsdPriceKrw());
-            kimchiTradeHistoryRepository.save(new KimchiTradeHistory(null,
-                                                                     userId,
-                                                                     tradeId,
-                                                                     LocalDateTime.now(),
-                                                                     KimchiTradeStatus.FINISHED,
-                                                                     decision.getCurrencyType(),
-                                                                     decision.getKimchiPremium().doubleValue(),
-                                                                     tradeResult.getBuyOrderDetail().getOrderQty(),
-                                                                     tradeResult.getBuyOrderDetail().getAveragePrice(),
-                                                                     tradeResult.getBuyOrderDetail().getFee(),
-                                                                     tradeResult.getShortOrderDetail().getOrderQty(),
-                                                                     tradeResult.getShortOrderDetail().getAveragePrice(),
-                                                                     tradeResult.getShortOrderDetail().getFee(),
-                                                                     profit != null ? profit.getProfitAmount() : null,
-                                                                     profit != null ? profit.getProfitRate() : null));
-
+            tradeHistoryService.saveNewHistory(userId, tradeId, KimchiTradeStatus.FINISHED, decision, tradeResult, profit);
         }
     }
 

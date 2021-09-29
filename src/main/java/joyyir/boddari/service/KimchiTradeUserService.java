@@ -1,7 +1,6 @@
 package joyyir.boddari.service;
 
 import joyyir.boddari.domain.kimchi.KimchiTradeHistory;
-import joyyir.boddari.domain.kimchi.KimchiTradeHistoryRepository;
 import joyyir.boddari.domain.kimchi.KimchiTradeStatus;
 import joyyir.boddari.domain.kimchi.KimchiTradeUser;
 import joyyir.boddari.domain.kimchi.KimchiTradeUserRepository;
@@ -10,14 +9,13 @@ import joyyir.boddari.domain.user.UserAndTradeHistory;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
 @AllArgsConstructor
 public class KimchiTradeUserService {
     private final KimchiTradeUserRepository kimchiTradeUserRepository;
-    private final KimchiTradeHistoryRepository kimchiTradeHistoryRepository;
+    private final KimchiTradeHistoryService tradeHistoryService;
 
     public KimchiTradeUser findUserById(String userId) {
         return kimchiTradeUserRepository.findById(userId)
@@ -35,7 +33,7 @@ public class KimchiTradeUserService {
         user.setTradeStatus(TradeStatus.START);
         KimchiTradeUser savedUser = kimchiTradeUserRepository.save(user);
 
-        KimchiTradeHistory savedTradeHistory = kimchiTradeHistoryRepository.save(new KimchiTradeHistory(null, userId, newTradeId, LocalDateTime.now(), KimchiTradeStatus.WAITING, null, null));
+        KimchiTradeHistory savedTradeHistory = tradeHistoryService.saveNewHistory(userId, newTradeId, KimchiTradeStatus.WAITING);
         return new UserAndTradeHistory(savedUser, savedTradeHistory);
     }
 
