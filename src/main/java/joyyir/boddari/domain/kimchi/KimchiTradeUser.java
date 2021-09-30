@@ -25,14 +25,17 @@ public class KimchiTradeUser {
 
     private Integer krwLimit;
 
+    private String tradeStrategy;
+
     public KimchiTradeUser() {
     }
 
-    public KimchiTradeUser(String userId, String currentTradeId, TradeStatus tradeStatus, Integer krwLimit) {
+    public KimchiTradeUser(String userId, String currentTradeId, TradeStatus tradeStatus, Integer krwLimit, String tradeStrategy) {
         this.userId = userId;
         this.currentTradeId = currentTradeId;
         this.tradeStatus = tradeStatus;
         this.krwLimit = krwLimit;
+        this.tradeStrategy = tradeStrategy;
     }
 
     @Override
@@ -42,6 +45,7 @@ public class KimchiTradeUser {
             .append("currentTradeId", currentTradeId)
             .append("tradeStatus", tradeStatus)
             .append("krwLimit", krwLimit)
+            .append("tradeStrategy", tradeStrategy)
             .toString();
     }
 }

@@ -1,6 +1,6 @@
 package joyyir.boddari.interfaces.scheduler;
 
-import joyyir.boddari.domain.kimchi.strategy.UpperAndLowerLimitStrategy;
+import joyyir.boddari.infrastructure.strategy.UpperAndLowerLimitStrategy;
 import joyyir.boddari.service.KimchiPremiumService;
 import joyyir.boddari.service.KimchiTradeService;
 import lombok.AllArgsConstructor;

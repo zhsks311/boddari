@@ -1,10 +1,11 @@
-package joyyir.boddari.domain.kimchi.strategy;
+package joyyir.boddari.infrastructure.strategy;
 
 import joyyir.boddari.domain.exchange.CurrencyType;
 import joyyir.boddari.domain.exchange.PlaceType;
 import joyyir.boddari.domain.kimchi.KimchiPremiumData;
 import joyyir.boddari.domain.kimchi.KimchiTradeHistory;
 import joyyir.boddari.domain.kimchi.TradeDecision;
+import joyyir.boddari.domain.kimchi.strategy.TradeStrategy;
 import joyyir.boddari.service.KimchiPremiumService;
 import lombok.AllArgsConstructor;
 
@@ -39,5 +40,18 @@ public class UpperAndLowerLimitStrategy implements TradeStrategy {
             return new TradeDecision(null, null, false, null);
         }
         return new TradeDecision(currencyType, PlaceType.SELL, true, kimchiPremium.getKimchiPremium());
+    }
+
+    @Override
+    public String getDescription() {
+        return String.format("하한 김프 %.2f%% 밑으로 떨어지면 매수하고 상한 김프 %.2f%% 위로 올라가면 매도합니다.", lowerLimit.doubleValue(), upperLimit.doubleValue());
+    }
+
+    public BigDecimal getLowerLimit() {
+        return lowerLimit;
+    }
+
+    public BigDecimal getUpperLimit() {
+        return upperLimit;
     }
 }

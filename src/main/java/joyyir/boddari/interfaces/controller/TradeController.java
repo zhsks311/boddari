@@ -97,6 +97,7 @@ public class TradeController implements TelegramCommandController {
         }
         KimchiTradeUser savedUser = userService.setUserTradeStatus(user, targetStatus, null);
         notifyTradeStatusChange(botHandler, chatId, savedUser);
+        botHandler.sendMessage(chatId, "김프 트레이딩 중에 업비트 매수 및 바이낸스 숏을 했던 자산이 있다면 직접 정리해주세요.");
     }
 
     private void pause(BoddariBotHandler botHandler, Long chatId, String userId) throws BadRequestException {
@@ -142,6 +143,12 @@ public class TradeController implements TelegramCommandController {
         }
         if (user.getTradeStatus() == targetStatus) {
             throw new BadRequestException("이미 " + targetStatus.name() + " 상태입니다.");
+        }
+        if (user.getKrwLimit() == null || user.getKrwLimit() <= 0) {
+            throw new BadRequestException("업비트 KRW 금액이 설정되어 있지 않습니다. /user set krw-limit 명령어로 설정하세요.");
+        }
+        if (user.getTradeStrategy() == null) {
+            throw new BadRequestException("트레이딩 전략이 설정되어 있지 않습니다. /user set trade-strategy 명령어로 설정하세요.");
         }
         return user;
     }
