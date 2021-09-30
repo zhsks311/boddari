@@ -1,6 +1,5 @@
 package joyyir.boddari.interfaces.scheduler;
 
-import joyyir.boddari.domain.bot.Bot;
 import joyyir.boddari.domain.exchange.CurrencyType;
 import joyyir.boddari.domain.kimchi.KimchiPremium;
 import joyyir.boddari.domain.kimchi.KimchiPremiumData;
@@ -32,7 +31,6 @@ public class KimchiPremiumCheckScheduler {
                   CurrencyType.MANA);
     private final KimchiPremiumService kimchiPremiumService;
     private final KimchiPremiumRepository kimchiPremiumRepository;
-    private final Bot boddariBot;
 
     @Scheduled(fixedRate = 1000 * 60)
     void checkKimchiPremium() {
