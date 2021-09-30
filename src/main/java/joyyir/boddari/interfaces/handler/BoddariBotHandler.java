@@ -83,7 +83,11 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
 
     private void help(Long chatId) {
         String message =
-            "처음 오신 분은 /user register 명령으로 유저 등록하시고 /trade start 명령으로 트레이딩을 시작하세요.\n" +
+            "처음 오신 분은 아래 절차에 따라 트레이딩을 시작하세요.\n" +
+                "1. /user register 명령으로 유저 등록\n" +
+                "2. /user set krw-limit 명령으로 업비트 KRW 금액 설정\n" +
+                "3. /user set trade-strategy 명령으로 김프 트레이딩 전략 설정\n" +
+                "4. /trade start 명령으로 트레이딩 시작\n" +
                 "\n" +
                 "/user register : 유저 등록\n" +
                 "/user unregister : 유저 정보 제거\n" +
