@@ -73,7 +73,7 @@ public class TradeController implements TelegramCommandController {
         TradeStatus targetStatus = TradeStatus.START;
         KimchiTradeUser user = findUser(userId, targetStatus);
         if (user.getTradeStatus() != TradeStatus.STOP) {
-            throw new BadRequestException("start 명령은 stop 상태일 때만 할 수 있습니다.");
+            throw new BadRequestException("start 명령은 STOP 상태일 때만 할 수 있습니다.");
         }
         UserAndTradeHistory userAndTradeHistory = userService.startNewTrade(userId);
         notifyTradeStatusChange(botHandler, chatId, userAndTradeHistory.getUser());

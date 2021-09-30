@@ -23,13 +23,16 @@ public class KimchiTradeUser {
     @Enumerated(value = EnumType.STRING)
     private TradeStatus tradeStatus;
 
+    private Integer krwLimit;
+
     public KimchiTradeUser() {
     }
 
-    public KimchiTradeUser(String userId, String currentTradeId, TradeStatus tradeStatus) {
+    public KimchiTradeUser(String userId, String currentTradeId, TradeStatus tradeStatus, Integer krwLimit) {
         this.userId = userId;
         this.currentTradeId = currentTradeId;
         this.tradeStatus = tradeStatus;
+        this.krwLimit = krwLimit;
     }
 
     @Override
@@ -38,6 +41,7 @@ public class KimchiTradeUser {
             .append("userId", userId)
             .append("currentTradeId", currentTradeId)
             .append("tradeStatus", tradeStatus)
+            .append("krwLimit", krwLimit)
             .toString();
     }
 }

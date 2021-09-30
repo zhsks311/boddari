@@ -34,7 +34,7 @@ public class KimchiTradeUserService {
     }
 
     public KimchiTradeUser register(String userId) {
-        return kimchiTradeUserRepository.save(new KimchiTradeUser(userId, null, TradeStatus.STOP));
+        return kimchiTradeUserRepository.save(new KimchiTradeUser(userId, null, TradeStatus.STOP, null));
     }
 
     public void delete(KimchiTradeUser user) {
@@ -44,6 +44,10 @@ public class KimchiTradeUserService {
     public KimchiTradeUser setUserTradeStatus(KimchiTradeUser user, TradeStatus status, String tradeId) {
         user.setTradeStatus(status);
         user.setCurrentTradeId(tradeId);
+        return kimchiTradeUserRepository.save(user);
+    }
+
+    public KimchiTradeUser save(KimchiTradeUser user) {
         return kimchiTradeUserRepository.save(user);
     }
 }
