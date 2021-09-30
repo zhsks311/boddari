@@ -16,10 +16,7 @@ import joyyir.boddari.domain.kimchi.KimchiTradeUser;
 import joyyir.boddari.domain.kimchi.TradeDecision;
 import joyyir.boddari.domain.kimchi.TradeResult;
 import joyyir.boddari.domain.kimchi.TradeStatus;
-import joyyir.boddari.domain.kimchi.strategy.BuyStrategy;
-import joyyir.boddari.domain.kimchi.strategy.DummyBuyStrategy;
-import joyyir.boddari.domain.kimchi.strategy.DummySellStrategy;
-import joyyir.boddari.domain.kimchi.strategy.SellStrategy;
+import joyyir.boddari.domain.kimchi.strategy.TradeStrategy;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,7 +41,7 @@ public class KimchiTradeService {
     private final Bot boddariBot;
 
     @Transactional
-    public void kimchiTrade(String userId, BigDecimal upbitBuyLimitKrw) {
+    public void kimchiTrade(String userId, BigDecimal upbitBuyLimitKrw, TradeStrategy tradeStrategy) {
         KimchiTradeUser user = kimchiTradeUserService.findUserById(userId);
         if (user == null || user.getTradeStatus() != TradeStatus.START) {
             return;
@@ -65,9 +62,9 @@ public class KimchiTradeService {
             }
             log.info("[jyjang] " + firstHistory.getTimestamp() + "에 시작된 trade의(tradeId: " + user.getCurrentTradeId() + ") 현재 상태: " + lastHistory.getStatus().name());
             if (lastHistory.getStatus() == KimchiTradeStatus.WAITING) {
-                checkBuyTimingAndTrade(userId, lastHistory.getTradeId(), upbitBuyLimitKrw);
+                checkBuyTimingAndTrade(tradeStrategy, userId, lastHistory.getTradeId(), upbitBuyLimitKrw);
             } else if (lastHistory.getStatus() == KimchiTradeStatus.STARTED) {
-                checkSellTimingAndTrade(userId, lastHistory, tradeHistory);
+                checkSellTimingAndTrade(tradeStrategy, userId, lastHistory, tradeHistory);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -76,9 +73,11 @@ public class KimchiTradeService {
         }
     }
 
-    private void checkBuyTimingAndTrade(String userId, String tradeId, BigDecimal upbitBuyLimitKrw) {
-        BuyStrategy buyStrategy = findBuyStrategy();
-        TradeDecision decision = buyStrategy.decide();
+    private void checkBuyTimingAndTrade(TradeStrategy tradeStrategy,
+                                        String userId,
+                                        String tradeId,
+                                        BigDecimal upbitBuyLimitKrw) {
+        TradeDecision decision = tradeStrategy.decideBuy();
         if (decision.isTrade()) {
             log.info("[jyjang] 조건이 충족되어 김프 거래를 시작합니다. {}", decision);
             TradeResult tradeResult = kimchiTradeBuy(decision.getCurrencyType(), upbitBuyLimitKrw);
@@ -86,11 +85,11 @@ public class KimchiTradeService {
         }
     }
 
-    private void checkSellTimingAndTrade(String userId,
+    private void checkSellTimingAndTrade(TradeStrategy tradeStrategy,
+                                         String userId,
                                          KimchiTradeHistory lastHistory,
                                          List<KimchiTradeHistory> tradeHistory) {
-        SellStrategy sellStrategy = findSellStrategy(lastHistory);
-        TradeDecision decision = sellStrategy.decide();
+        TradeDecision decision = tradeStrategy.decideSell(lastHistory);
         if (decision.isTrade()) {
             log.info("[jyjang] 조건이 충족되어 김프 거래를 마무리합니다. {}", decision);
             String tradeId = lastHistory.getTradeId();
@@ -203,16 +202,6 @@ public class KimchiTradeService {
         } catch (InterruptedException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private BuyStrategy findBuyStrategy() {
-        // TODO : jyjang - develop
-        return new DummyBuyStrategy(kimchiPremiumService);
-    }
-
-    private SellStrategy findSellStrategy(KimchiTradeHistory lastHistory) {
-        // TODO : jyjang - develop
-        return new DummySellStrategy(kimchiPremiumService, lastHistory);
     }
 }
 

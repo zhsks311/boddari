@@ -25,7 +25,7 @@ public class KimchiTradeUserService {
     public UserAndTradeHistory startNewTrade(String userId) {
         KimchiTradeUser user = findUserById(userId);
         if (user == null) {
-            throw new RuntimeException("등록되지 않은 유저입니다. userId:" + userId);
+            throw new RuntimeException("등록되지 않은 유저입니다.");
         }
         String newTradeId = UUID.randomUUID().toString();
         KimchiTradeUser savedUser = setUserTradeStatus(user, TradeStatus.START, newTradeId);

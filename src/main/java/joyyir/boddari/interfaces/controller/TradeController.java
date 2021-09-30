@@ -109,8 +109,11 @@ public class TradeController implements TelegramCommandController {
         notifyTradeStatusChange(botHandler, chatId, savedUser);
     }
 
-    private void status(BoddariBotHandler botHandler, Long chatId, String userId) {
+    private void status(BoddariBotHandler botHandler, Long chatId, String userId) throws BadRequestException {
         KimchiTradeUser user = userService.findUserById(userId);
+        if (user == null) {
+            throw new BadRequestException("등록되지 않은 유저입니다.");
+        }
         if (StringUtils.isEmpty(user.getCurrentTradeId())) {
             botHandler.sendMessage(chatId, "진행 중인 트레이드가 없습니다. 트레이드 상태: " + user.getTradeStatus().name());
             return;
@@ -135,7 +138,7 @@ public class TradeController implements TelegramCommandController {
     private KimchiTradeUser findUser(String userId, TradeStatus targetStatus) throws BadRequestException {
         KimchiTradeUser user = userService.findUserById(userId);
         if (user == null) {
-            throw new BadRequestException("등록되지 않은 유저입니다. userId:" + userId);
+            throw new BadRequestException("등록되지 않은 유저입니다.");
         }
         if (user.getTradeStatus() == targetStatus) {
             throw new BadRequestException("이미 " + targetStatus.name() + " 상태입니다.");
