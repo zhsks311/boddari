@@ -30,7 +30,7 @@ public class UserController implements TelegramCommandController {
                 "/user unregister : 유저 정보 제거\n" +
                 "/user info : 유저 정보 조회\n" +
                 "/user set krw-limit {금액} : 김프 거래를 위한 업비트 KRW 금액 변경\n" +
-                "/user set trade-strategy : ";
+                "/user set trade-strategy {설정값} : 김프 트레이딩 전략 설정";
             botHandler.sendMessage(chatId, helpMessage);
             return;
         }
@@ -46,7 +46,7 @@ public class UserController implements TelegramCommandController {
                 break;
             case "set":
                 String helpMessage = "/user set krw-limit {금액} : 김프 거래를 위한 업비트 KRW 금액 변경\n" +
-                                     "/user set trade-strategy : ";
+                                     "/user set trade-strategy {설정값} : 김프 트레이딩 전략 설정";
                 if (commands.length == 2) {
                     botHandler.sendMessage(chatId, helpMessage);
                     return;
