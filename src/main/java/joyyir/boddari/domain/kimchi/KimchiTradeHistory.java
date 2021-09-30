@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 @Getter
@@ -111,5 +112,17 @@ public class KimchiTradeHistory {
         this.shortFee = shortFee;
         this.profitAmount = profitAmount;
         this.profitRate = profitRate;
+    }
+
+    public String buyDescription() {
+        return String.format("%s | %s | %s | 김프 %.2f%% | 업비트 평단 %s원에 %s개 매수 | 바이낸스 평단 %s달러에 %s개 숏",
+                             getTimestamp(), getStatus(), getCurrencyType(), getKimchiPremium(), getBuyAvgPrice() != null ? getBuyAvgPrice().setScale(0, RoundingMode.FLOOR) : null,
+                             getBuyQuantity(), getShortAvgPrice() != null ? getShortAvgPrice().setScale(4, RoundingMode.FLOOR) : null, getShortQuantity());
+    }
+
+    public String sellDescription() {
+        return String.format("%s | %s | %s | 김프 %.2f%% | 업비트 평단 %s원에 %s개 매도 | 바이낸스 평단 %s달러에 %s개 롱 | 이익 %s원 (%.2f%%)",
+                             getTimestamp(), getStatus(), getCurrencyType(), getKimchiPremium(), getBuyAvgPrice() != null ? getBuyAvgPrice().setScale(0, RoundingMode.FLOOR) : null,
+                             getBuyQuantity(), getShortAvgPrice() != null ? getShortAvgPrice().setScale(4, RoundingMode.FLOOR) : null, getShortQuantity(), getProfitAmount(), getProfitRate());
     }
 }

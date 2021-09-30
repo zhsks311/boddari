@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -166,13 +165,9 @@ public class TradeController implements TelegramCommandController {
                                if (x.getStatus() == KimchiTradeStatus.WAITING || x.getStatus() == KimchiTradeStatus.ERROR) {
                                    return String.format("%s | %s", x.getTimestamp(), x.getStatus());
                                } else if (x.getStatus() == KimchiTradeStatus.STARTED) {
-                                   return String.format("%s | %s | %s | 김프 %.2f%% | 업비트 평단 %s원에 %s개 매수 | 바이낸스 평단 %s달러에 %s개 숏",
-                                                        x.getTimestamp(), x.getStatus(), x.getCurrencyType(), x.getKimchiPremium(), x.getBuyAvgPrice() != null ? x.getBuyAvgPrice().setScale(0, RoundingMode.FLOOR) : null,
-                                                        x.getBuyQuantity(), x.getShortAvgPrice() != null ? x.getShortAvgPrice().setScale(4, RoundingMode.FLOOR) : null, x.getShortQuantity());
+                                   return x.buyDescription();
                                } else if (x.getStatus() == KimchiTradeStatus.FINISHED) {
-                                   return String.format("%s | %s | %s | 김프 %.2f%% | 업비트 평단 %s원에 %s개 매도 | 바이낸스 평단 %s달러에 %s개 롱 | 이익 %s원 (%.2f%%)",
-                                                        x.getTimestamp(), x.getStatus(), x.getCurrencyType(), x.getKimchiPremium(), x.getBuyAvgPrice() != null ? x.getBuyAvgPrice().setScale(0, RoundingMode.FLOOR) : null,
-                                                        x.getBuyQuantity(), x.getShortAvgPrice() != null ? x.getShortAvgPrice().setScale(4, RoundingMode.FLOOR) : null, x.getShortQuantity(), x.getProfitAmount(), x.getProfitRate());
+                                   return x.sellDescription();
                                } else {
                                    return String.format("%s | %s | unknown", x.getTimestamp(), x.getStatus());
                                }
