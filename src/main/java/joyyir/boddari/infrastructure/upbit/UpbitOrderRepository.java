@@ -1,13 +1,11 @@
 package joyyir.boddari.infrastructure.upbit;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import joyyir.boddari.domain.exchange.MarketType;
 import joyyir.boddari.domain.exchange.OrderDetail;
 import joyyir.boddari.domain.exchange.OrderRepository;
 import joyyir.boddari.domain.exchange.OrderStatus;
 import joyyir.boddari.infrastructure.upbit.dto.OrderDTO;
 import joyyir.boddari.infrastructure.upbit.dto.TradeDTO;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -25,22 +23,13 @@ import java.util.Map;
 @Repository
 public class UpbitOrderRepository implements OrderRepository {
     private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
-    private final String accessKey;
-    private final String secretKey;
 
-    public UpbitOrderRepository(RestTemplate restTemplate,
-                                ObjectMapper objectMapper,
-                                @Value("${constant.upbit.access-key}") String accessKey,
-                                @Value("${constant.upbit.secret-key}") String secretKey) {
+    public UpbitOrderRepository(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-        this.objectMapper = objectMapper;
-        this.accessKey = accessKey;
-        this.secretKey = secretKey;
     }
 
     @Override
-    public OrderDetail getOrderDetail(MarketType marketType, String orderId) {
+    public OrderDetail getOrderDetail(MarketType marketType, String orderId, String accessKey, String secretKey) {
         final String endpoint = "https://api.upbit.com/v1/order";
 
         Map<String, String> params = new LinkedHashMap<>();

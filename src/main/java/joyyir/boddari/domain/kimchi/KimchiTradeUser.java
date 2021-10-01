@@ -27,15 +27,35 @@ public class KimchiTradeUser {
 
     private String tradeStrategy;
 
+    private String upbitAccessKey;
+
+    private String upbitSecretKey;
+
+    private String binanceAccessKey;
+
+    private String binanceSecretKey;
+
     public KimchiTradeUser() {
     }
 
-    public KimchiTradeUser(String userId, String currentTradeId, TradeStatus tradeStatus, Integer krwLimit, String tradeStrategy) {
+    public KimchiTradeUser(String userId,
+                           String currentTradeId,
+                           TradeStatus tradeStatus,
+                           Integer krwLimit,
+                           String tradeStrategy,
+                           String upbitAccessKey,
+                           String upbitSecretKey,
+                           String binanceAccessKey,
+                           String binanceSecretKey) {
         this.userId = userId;
         this.currentTradeId = currentTradeId;
         this.tradeStatus = tradeStatus;
         this.krwLimit = krwLimit;
         this.tradeStrategy = tradeStrategy;
+        this.upbitAccessKey = upbitAccessKey;
+        this.upbitSecretKey = upbitSecretKey;
+        this.binanceAccessKey = binanceAccessKey;
+        this.binanceSecretKey = binanceSecretKey;
     }
 
     @Override

@@ -23,12 +23,6 @@ logging:
 #    httpclient.wire: DEBUG
 
 constant:
-  upbit:
-    access-key: your-access-key
-    secret-key: your-secret-key
-  binance:
-    access-key: your-access-key
-    secret-key: your-secret-key
   telegram-boddaribot:
     access-token: your-access-token
   grafana:

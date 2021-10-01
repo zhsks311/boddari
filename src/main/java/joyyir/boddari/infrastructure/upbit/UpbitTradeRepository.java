@@ -6,7 +6,6 @@ import joyyir.boddari.domain.exchange.MarketType;
 import joyyir.boddari.domain.exchange.PlaceType;
 import joyyir.boddari.domain.exchange.TradeRepository;
 import joyyir.boddari.infrastructure.upbit.dto.OrderDTO;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
@@ -22,17 +21,11 @@ import java.util.Map;
 public class UpbitTradeRepository implements TradeRepository {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    private final String accessKey;
-    private final String secretKey;
 
     public UpbitTradeRepository(RestTemplate restTemplate,
-                                ObjectMapper objectMapper,
-                                @Value("${constant.upbit.access-key}") String accessKey,
-                                @Value("${constant.upbit.secret-key}") String secretKey) {
+                                ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
-        this.accessKey = accessKey;
-        this.secretKey = secretKey;
     }
 
     /**
@@ -41,8 +34,8 @@ public class UpbitTradeRepository implements TradeRepository {
      * @return           주문의 고유 아이디
      */
     @Override
-    public String marketBuy(MarketType marketType, BigDecimal price) {
-        return order(marketType, PlaceType.BUY, price, null, "price");
+    public String marketBuy(MarketType marketType, BigDecimal price, String accessKey, String secretKey) {
+        return order(marketType, PlaceType.BUY, price, null, "price", accessKey, secretKey);
     }
 
     /**
@@ -51,16 +44,16 @@ public class UpbitTradeRepository implements TradeRepository {
      * @return           주문의 고유 아이디
      */
     @Override
-    public String marketSell(MarketType marketType, BigDecimal volume) {
-        return order(marketType, PlaceType.SELL, null, volume, "market");
+    public String marketSell(MarketType marketType, BigDecimal volume, String accessKey, String secretKey) {
+        return order(marketType, PlaceType.SELL, null, volume, "market", accessKey, secretKey);
     }
 
     @Override
-    public String limitOrder(MarketType marketType, PlaceType placeType, BigDecimal price, BigDecimal volume) {
-        return order(marketType, placeType, price, volume, "limit");
+    public String limitOrder(MarketType marketType, PlaceType placeType, BigDecimal price, BigDecimal volume, String accessKey, String secretKey) {
+        return order(marketType, placeType, price, volume, "limit", accessKey, secretKey);
     }
 
-    private String order(MarketType marketType, PlaceType placeType, BigDecimal price, BigDecimal volume, String orderType) {
+    private String order(MarketType marketType, PlaceType placeType, BigDecimal price, BigDecimal volume, String orderType, String accessKey, String secretKey) {
         final String endpoint = "https://api.upbit.com/v1/orders";
 
         Map<String, String> params = new LinkedHashMap<>();

@@ -6,7 +6,6 @@ import joyyir.boddari.domain.exchange.MarketType;
 import joyyir.boddari.infrastructure.binance.dto.ChangeInitialLeverageDTO;
 import joyyir.boddari.infrastructure.binance.dto.ChangeMarginTypeDTO;
 import joyyir.boddari.infrastructure.binance.dto.FutureOrderDTO;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
@@ -24,21 +23,15 @@ import java.util.Map;
 public class BinanceFutureTradeRepository implements FutureTradeRepository {
     private final RestTemplate restTemplate;
     private final BinanceExchangeInfo binanceExchangeInfo;
-    private final String accessKey;
-    private final String secretKey;
 
     public BinanceFutureTradeRepository(RestTemplate restTemplate,
-                                        BinanceExchangeInfo binanceExchangeInfo,
-                                        @Value("${constant.binance.access-key}") String accessKey,
-                                        @Value("${constant.binance.secret-key}") String secretKey) {
+                                        BinanceExchangeInfo binanceExchangeInfo) {
         this.restTemplate = restTemplate;
         this.binanceExchangeInfo = binanceExchangeInfo;
-        this.accessKey = accessKey;
-        this.secretKey = secretKey;
     }
 
     @Override
-    public boolean changeInitialLeverage(MarketType marketType, int leverage) {
+    public boolean changeInitialLeverage(MarketType marketType, int leverage, String accessKey, String secretKey) {
         final String endpoint = "https://fapi.binance.com/fapi/v1/leverage";
 
         Map<String, String> params = new LinkedHashMap<>();
@@ -61,7 +54,7 @@ public class BinanceFutureTradeRepository implements FutureTradeRepository {
     }
 
     @Override
-    public boolean changeMarginType(MarketType marketType, String marginType) {
+    public boolean changeMarginType(MarketType marketType, String marginType, String accessKey, String secretKey) {
         final String endpoint = "https://fapi.binance.com/fapi/v1/marginType";
 
         Map<String, String> params = new LinkedHashMap<>();
@@ -92,21 +85,21 @@ public class BinanceFutureTradeRepository implements FutureTradeRepository {
     }
 
     @Override
-    public String marketLong(MarketType marketType, BigDecimal quantity) {
-        return order(marketType, FuturePlaceType.LONG, null, quantity, "MARKET");
+    public String marketLong(MarketType marketType, BigDecimal quantity, String accessKey, String secretKey) {
+        return order(marketType, FuturePlaceType.LONG, null, quantity, "MARKET", accessKey, secretKey);
     }
 
     @Override
-    public String marketShort(MarketType marketType, BigDecimal quantity) {
-        return order(marketType, FuturePlaceType.SHORT, null, quantity, "MARKET");
+    public String marketShort(MarketType marketType, BigDecimal quantity, String accessKey, String secretKey) {
+        return order(marketType, FuturePlaceType.SHORT, null, quantity, "MARKET", accessKey, secretKey);
     }
 
     @Override
-    public String limitOrder(MarketType marketType, FuturePlaceType placeType, BigDecimal price, BigDecimal quantity) {
-        return order(marketType, placeType, price, quantity, "LIMIT");
+    public String limitOrder(MarketType marketType, FuturePlaceType placeType, BigDecimal price, BigDecimal quantity, String accessKey, String secretKey) {
+        return order(marketType, placeType, price, quantity, "LIMIT", accessKey, secretKey);
     }
 
-    private String order(MarketType marketType, FuturePlaceType placeType, BigDecimal price, BigDecimal quantity, String orderType) {
+    private String order(MarketType marketType, FuturePlaceType placeType, BigDecimal price, BigDecimal quantity, String orderType, String accessKey, String secretKey) {
         final String endpoint = "https://fapi.binance.com/fapi/v1/order";
         String symbol = BinanceMarketTypeConverter.convert(marketType);
 

@@ -38,7 +38,7 @@ public class UserController implements TelegramCommandController {
         }
         switch (commands[1]) {
             case "register":
-                register(botHandler, chatId, userId);
+                register(botHandler, chatId, userId, commands);
                 break;
             case "unregister":
                 unregister(botHandler, chatId, userId);
@@ -69,12 +69,15 @@ public class UserController implements TelegramCommandController {
         }
     }
 
-    private void register(BoddariBotHandler botHandler, Long chatId, String userId) throws BadRequestException {
+    private void register(BoddariBotHandler botHandler, Long chatId, String userId, String[] commands) throws BadRequestException {
         KimchiTradeUser user = userService.findUserById(userId);
         if (user != null) {
             throw new BadRequestException("이미 등록된 유저입니다.");
         }
-        KimchiTradeUser newUser = userService.register(userId);
+        if (commands.length != 6) {
+            throw new BadRequestException("잘못된 명령입니다. (사용법) /user register {업비트 access key} {업비트 secret key} {바이낸스 access key} {바이낸스 secret key}");
+        }
+        KimchiTradeUser newUser = userService.register(userId, commands[2], commands[3], commands[4], commands[5]);
         botHandler.sendMessage(chatId, "유저 등록 성공. 환영합니다. " + newUser);
     }
 

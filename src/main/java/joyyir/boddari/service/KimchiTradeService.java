@@ -16,6 +16,7 @@ import joyyir.boddari.domain.kimchi.TradeDecision;
 import joyyir.boddari.domain.kimchi.TradeResult;
 import joyyir.boddari.domain.kimchi.TradeStatus;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategy;
+import joyyir.boddari.domain.kimchi.strategy.TradeStrategyFactory;
 import joyyir.boddari.interfaces.handler.BoddariBotHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ import java.util.List;
 public class KimchiTradeService {
     private final KimchiTradeUserService kimchiTradeUserService;
     private final KimchiTradeHistoryService tradeHistoryService;
+    private final TradeStrategyFactory tradeStrategyFactory;
     private final TradeRepository upbitTradeRepository;
     private final OrderRepository upbitOrderRepository;
     private final OrderRepository binanceFutureOrderRepository;
@@ -39,17 +41,16 @@ public class KimchiTradeService {
     private final UsdPriceRepository usdPriceRepository;
 
     @Transactional
-    public void kimchiTrade(String userId,
-                            BigDecimal upbitBuyLimitKrw,
-                            TradeStrategy tradeStrategy,
-                            BoddariBotHandler botHandler) {
-        KimchiTradeUser user = kimchiTradeUserService.findUserById(userId);
+    public void kimchiTrade(KimchiTradeUser user, BoddariBotHandler botHandler) {
         if (user == null || user.getTradeStatus() != TradeStatus.START) {
             return;
         }
-        List<KimchiTradeHistory> tradeHistory = tradeHistoryService.findTradeHistory(user.getUserId(), user.getCurrentTradeId());
+        final String userId = user.getUserId();
 
         try {
+            TradeStrategy tradeStrategy = tradeStrategyFactory.create(user.getTradeStrategy());
+            List<KimchiTradeHistory> tradeHistory = tradeHistoryService.findTradeHistory(userId, user.getCurrentTradeId());
+
             KimchiTradeHistory firstHistory = tradeHistory.get(tradeHistory.size() - 1);
             KimchiTradeHistory lastHistory = tradeHistory.get(0);
             if (lastHistory.getStatus() == KimchiTradeStatus.ERROR) {
@@ -63,9 +64,9 @@ public class KimchiTradeService {
             }
             log.info("[jyjang] " + firstHistory.getTimestamp() + "에 시작된 trade의(tradeId: " + user.getCurrentTradeId() + ") 현재 상태: " + lastHistory.getStatus().name());
             if (lastHistory.getStatus() == KimchiTradeStatus.WAITING) {
-                checkBuyTimingAndTrade(tradeStrategy, userId, lastHistory.getTradeId(), upbitBuyLimitKrw, botHandler);
+                checkBuyTimingAndTrade(user, tradeStrategy, lastHistory.getTradeId(), botHandler);
             } else if (lastHistory.getStatus() == KimchiTradeStatus.STARTED) {
-                checkSellTimingAndTrade(tradeStrategy, userId, lastHistory, tradeHistory, botHandler);
+                checkSellTimingAndTrade(user, tradeStrategy, lastHistory, tradeHistory, botHandler);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -74,27 +75,26 @@ public class KimchiTradeService {
         }
     }
 
-    private void checkBuyTimingAndTrade(TradeStrategy tradeStrategy,
-                                        String userId,
+    private void checkBuyTimingAndTrade(KimchiTradeUser user,
+                                        TradeStrategy tradeStrategy,
                                         String tradeId,
-                                        BigDecimal upbitBuyLimitKrw,
                                         BoddariBotHandler botHandler) {
         TradeDecision decision = tradeStrategy.decideBuy();
         if (decision.isTrade()) {
             log.info("[jyjang] 조건이 충족되어 김프 거래를 시작합니다. {}", decision);
-            TradeResult tradeResult = kimchiTradeBuy(decision.getCurrencyType(), upbitBuyLimitKrw);
-            KimchiTradeHistory buyHistory = tradeHistoryService.saveNewHistory(userId,
+            TradeResult tradeResult = kimchiTradeBuy(decision.getCurrencyType(), new BigDecimal(user.getKrwLimit()), user);
+            KimchiTradeHistory buyHistory = tradeHistoryService.saveNewHistory(user.getUserId(),
                                                                                tradeId,
                                                                                KimchiTradeStatus.STARTED,
                                                                                decision,
                                                                                tradeResult,
                                                                                null);
-            botHandler.sendMessage(Long.valueOf(userId), buyHistory.buyDescription());
+            botHandler.sendMessage(Long.valueOf(user.getUserId()), buyHistory.buyDescription());
         }
     }
 
-    private void checkSellTimingAndTrade(TradeStrategy tradeStrategy,
-                                         String userId,
+    private void checkSellTimingAndTrade(KimchiTradeUser user,
+                                         TradeStrategy tradeStrategy,
                                          KimchiTradeHistory lastHistory,
                                          List<KimchiTradeHistory> tradeHistory,
                                          BoddariBotHandler botHandler) {
@@ -104,19 +104,20 @@ public class KimchiTradeService {
             String tradeId = lastHistory.getTradeId();
             TradeResult tradeResult = kimchiTradeSell(decision.getCurrencyType(),
                                                       lastHistory.getBuyQuantity(),
-                                                      lastHistory.getShortQuantity());
+                                                      lastHistory.getShortQuantity(),
+                                                      user);
             KimchiTradeHistory buyHistory = tradeHistory.stream()
                                                         .filter(x -> x.getStatus() == KimchiTradeStatus.STARTED)
                                                         .findFirst()
                                                         .orElse(null);
             KimchiTradeProfit profit = calculateProfit(tradeResult, buyHistory, usdPriceRepository.getUsdPriceKrw());
-            KimchiTradeHistory sellHistory = tradeHistoryService.saveNewHistory(userId,
+            KimchiTradeHistory sellHistory = tradeHistoryService.saveNewHistory(user.getUserId(),
                                                                                 tradeId,
                                                                                 KimchiTradeStatus.FINISHED,
                                                                                 decision,
                                                                                 tradeResult,
                                                                                 profit);
-            botHandler.sendMessage(Long.valueOf(userId), sellHistory.sellDescription());
+            botHandler.sendMessage(Long.valueOf(user.getUserId()), sellHistory.sellDescription());
         }
     }
 
@@ -147,12 +148,12 @@ public class KimchiTradeService {
         return new KimchiTradeProfit(profitAmount, profitRate);
     }
 
-    private TradeResult kimchiTradeBuy(CurrencyType currencyType, BigDecimal upbitBuyLimitKrw) {
+    private TradeResult kimchiTradeBuy(CurrencyType currencyType, BigDecimal upbitBuyLimitKrw, KimchiTradeUser user) {
         MarketType upbitMarket = currencyType.getKrwMarket();
-        String upbitOrderId = upbitTradeRepository.marketBuy(upbitMarket, upbitBuyLimitKrw);
+        String upbitOrderId = upbitTradeRepository.marketBuy(upbitMarket, upbitBuyLimitKrw, user.getUpbitAccessKey(), user.getUpbitSecretKey());
         OrderDetail upbitOrderDetail = null;
         for (int i = 0; i < 5; i++) {
-            upbitOrderDetail = upbitOrderRepository.getOrderDetail(null, upbitOrderId);
+            upbitOrderDetail = upbitOrderRepository.getOrderDetail(null, upbitOrderId, user.getUpbitAccessKey(), user.getUpbitSecretKey());
             if (upbitOrderDetail.getOrderStatus() == OrderStatus.COMPLETED) {
                 log.info("[jyjang] 업비트 시장가 매수 완료. {} 마켓에서 {}개 매수", upbitMarket.name(), upbitOrderDetail.getOrderQty());
                 break;
@@ -163,10 +164,10 @@ public class KimchiTradeService {
             sleep(1000);
         }
         MarketType binanceMarket = currencyType.getUsdtMarket();
-        String binanceOrderId = binanceFutureTradeRepository.marketShort(binanceMarket, upbitOrderDetail.getOrderQty());
+        String binanceOrderId = binanceFutureTradeRepository.marketShort(binanceMarket, upbitOrderDetail.getOrderQty(), user.getBinanceAccessKey(), user.getBinanceSecretKey());
         OrderDetail binanceOrderDetail = null;
         for (int i = 0; i < 5; i++) {
-            binanceOrderDetail = binanceFutureOrderRepository.getOrderDetail(binanceMarket, binanceOrderId);
+            binanceOrderDetail = binanceFutureOrderRepository.getOrderDetail(binanceMarket, binanceOrderId, user.getBinanceAccessKey(), user.getBinanceSecretKey());
             if (binanceOrderDetail.getOrderStatus() == OrderStatus.COMPLETED) {
                 log.info("[jyjang] 바이낸스 시장가 숏 완료. {} 마켓에서 {}개 매도", binanceMarket.name(), binanceOrderDetail.getOrderQty());
                 break;
@@ -179,12 +180,12 @@ public class KimchiTradeService {
         return new TradeResult(upbitOrderDetail, binanceOrderDetail);
     }
 
-    private TradeResult kimchiTradeSell(CurrencyType currencyType, BigDecimal buyQuantity, BigDecimal shortQuantity) {
+    private TradeResult kimchiTradeSell(CurrencyType currencyType, BigDecimal buyQuantity, BigDecimal shortQuantity, KimchiTradeUser user) {
         MarketType upbitMarket = currencyType.getKrwMarket();
-        String upbitOrderId = upbitTradeRepository.marketSell(upbitMarket, buyQuantity);
+        String upbitOrderId = upbitTradeRepository.marketSell(upbitMarket, buyQuantity, user.getUpbitAccessKey(), user.getUpbitSecretKey());
         OrderDetail upbitOrderDetail = null;
         for (int i = 0; i < 5; i++) {
-            upbitOrderDetail = upbitOrderRepository.getOrderDetail(null, upbitOrderId);
+            upbitOrderDetail = upbitOrderRepository.getOrderDetail(null, upbitOrderId, user.getUpbitAccessKey(), user.getUpbitSecretKey());
             if (upbitOrderDetail.getOrderStatus() == OrderStatus.COMPLETED) {
                 log.info("[jyjang] 업비트 시장가 매도 완료. {} 마켓에서 {}개 매도", upbitMarket.name(), upbitOrderDetail.getOrderQty());
                 break;
@@ -195,10 +196,10 @@ public class KimchiTradeService {
             sleep(1000);
         }
         MarketType binanceMarket = currencyType.getUsdtMarket();
-        String binanceOrderId = binanceFutureTradeRepository.marketLong(binanceMarket, shortQuantity);
+        String binanceOrderId = binanceFutureTradeRepository.marketLong(binanceMarket, shortQuantity, user.getBinanceAccessKey(), user.getBinanceSecretKey());
         OrderDetail binanceOrderDetail = null;
         for (int i = 0; i < 5; i++) {
-            binanceOrderDetail = binanceFutureOrderRepository.getOrderDetail(binanceMarket, binanceOrderId);
+            binanceOrderDetail = binanceFutureOrderRepository.getOrderDetail(binanceMarket, binanceOrderId, user.getBinanceAccessKey(), user.getBinanceSecretKey());
             if (binanceOrderDetail.getOrderStatus() == OrderStatus.COMPLETED) {
                 log.info("[jyjang] 바이낸스 시장가 롱 완료. {} 마켓에서 {}개 매수", binanceMarket.name(), binanceOrderDetail.getOrderQty());
                 break;

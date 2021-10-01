@@ -38,8 +38,8 @@ public class KimchiTradeUserService {
         return new UserAndTradeHistory(savedUser, savedTradeHistory);
     }
 
-    public KimchiTradeUser register(String userId) {
-        return kimchiTradeUserRepository.save(new KimchiTradeUser(userId, null, TradeStatus.STOP, null, null));
+    public KimchiTradeUser register(String userId, String upbitAccessKey, String upbitSecretKey, String binanceAccessKey, String binanceSecretKey) {
+        return kimchiTradeUserRepository.save(new KimchiTradeUser(userId, null, TradeStatus.STOP, null, null, upbitAccessKey, upbitSecretKey, binanceAccessKey, binanceSecretKey));
     }
 
     public void delete(KimchiTradeUser user) {
