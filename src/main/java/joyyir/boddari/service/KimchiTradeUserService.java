@@ -9,6 +9,7 @@ import joyyir.boddari.domain.user.UserAndTradeHistory;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -20,6 +21,10 @@ public class KimchiTradeUserService {
     public KimchiTradeUser findUserById(String userId) {
         return kimchiTradeUserRepository.findById(userId)
                                         .orElse(null);
+    }
+
+    public List<KimchiTradeUser> findAllByTradeStatus(TradeStatus tradeStatus) {
+        return kimchiTradeUserRepository.findAllByTradeStatus(tradeStatus);
     }
 
     public UserAndTradeHistory startNewTrade(String userId) {

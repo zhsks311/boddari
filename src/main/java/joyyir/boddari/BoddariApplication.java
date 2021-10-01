@@ -12,6 +12,9 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @SpringBootApplication
 @EnableScheduling
 public class BoddariApplication {
@@ -36,5 +39,10 @@ public class BoddariApplication {
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
         telegramBotsApi.registerBot(boddariBotHandler);
         return telegramBotsApi;
+    }
+
+    @Bean
+    public ExecutorService tradeExecutorService() {
+        return Executors.newFixedThreadPool(50);
     }
 }
