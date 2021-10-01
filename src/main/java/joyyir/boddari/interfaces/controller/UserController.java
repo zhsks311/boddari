@@ -7,6 +7,7 @@ import joyyir.boddari.domain.kimchi.strategy.TradeStrategyFactory;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategyFactoryException;
 import joyyir.boddari.interfaces.exception.BadRequestException;
 import joyyir.boddari.interfaces.handler.BoddariBotHandler;
+import joyyir.boddari.service.KimchiTradeHistoryService;
 import joyyir.boddari.service.KimchiTradeUserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class UserController implements TelegramCommandController {
     private final KimchiTradeUserService userService;
+    private final KimchiTradeHistoryService tradeHistoryService;
     private final TradeStrategyFactory tradeStrategyFactory;
 
     @Override
@@ -82,6 +84,7 @@ public class UserController implements TelegramCommandController {
             throw new BadRequestException("등록되지 않은 유저입니다.");
         }
         userService.delete(user);
+        tradeHistoryService.deleteByUserId(userId);
         botHandler.sendMessage(chatId, "유저 제거 성공. 이용해주셔서 감사합니다.");
     }
 

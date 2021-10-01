@@ -46,4 +46,8 @@ public class KimchiTradeHistoryService {
     public List<KimchiTradeHistory> findAllByUserIdAndTimestampAfter(String userId, LocalDateTime timeAfter) {
         return this.kimchiTradeHistoryRepository.findAllByUserIdAndTimestampAfterOrderByTimestampAsc(userId, timeAfter);
     }
+
+    public void deleteByUserId(String userId) {
+        kimchiTradeHistoryRepository.deleteByUserId(userId);
+    }
 }
