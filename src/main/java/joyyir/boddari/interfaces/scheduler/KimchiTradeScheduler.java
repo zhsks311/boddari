@@ -26,9 +26,6 @@ public class KimchiTradeScheduler {
     void kimchiTradeScheduler() {
         List<KimchiTradeUser> tradeUsers = kimchiTradeUserService.findAllByTradeStatus(TradeStatus.START);
         for (KimchiTradeUser tradeUser : tradeUsers) {
-            if (!tradeUser.getUserId().equals("1080798457")) { // TODO : jyjang - remove
-                continue;
-            }
             tradeExecutorService.execute(() -> kimchiTradeService.kimchiTrade(tradeUser, botHandler));
         }
     }

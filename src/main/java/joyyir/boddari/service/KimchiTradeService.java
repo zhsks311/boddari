@@ -54,7 +54,7 @@ public class KimchiTradeService {
             KimchiTradeHistory firstHistory = tradeHistory.get(tradeHistory.size() - 1);
             KimchiTradeHistory lastHistory = tradeHistory.get(0);
             if (lastHistory.getStatus() == KimchiTradeStatus.ERROR) {
-                log.info("마지막 트레이드에서 오류가 발생했습니다. 오류를 확인하세요.");
+                log.info("[jyjang] 마지막 트레이드에서 오류가 발생했습니다. 오류를 확인하세요.");
                 return;
             }
             if (lastHistory.getStatus() == KimchiTradeStatus.FINISHED) {

@@ -95,7 +95,7 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
                 "3. /user set trade-strategy 명령으로 김프 트레이딩 전략 설정\n" +
                 "4. /trade start 명령으로 트레이딩 시작\n" +
                 "\n" +
-                "/user register : 유저 등록\n" +
+                "/user register {업비트 access key} {업비트 secret key} {바이낸스 access key} {바이낸스 secret key} : 유저 등록\n" +
                 "/user unregister : 유저 정보 제거\n" +
                 "/user info : 유저 정보 조회\n" +
                 "/user set krw-limit {금액} : 김프 거래를 위한 업비트 KRW 금액 변경\n" +

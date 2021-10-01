@@ -28,7 +28,7 @@ public class UserController implements TelegramCommandController {
         String userId = String.valueOf(chatId);
         if (commands.length < 2) {
             String helpMessage =
-                "/user register : 유저 등록\n" +
+                "/user register {업비트 access key} {업비트 secret key} {바이낸스 access key} {바이낸스 secret key} : 유저 등록\n" +
                 "/user unregister : 유저 정보 제거\n" +
                 "/user info : 유저 정보 조회\n" +
                 "/user set krw-limit {금액} : 김프 거래를 위한 업비트 KRW 금액 변경\n" +
