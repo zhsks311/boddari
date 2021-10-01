@@ -31,3 +31,7 @@ constant:
     secret-key: your-secret-key
   telegram-boddaribot:
     access-token: your-access-token
+  grafana:
+    api-key: your-api-key
+  graph-image-path: /your/graph/image/path
+  graph-url: http://your-graph-url

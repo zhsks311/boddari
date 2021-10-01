@@ -16,13 +16,16 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
     private final String token;
     private final TelegramCommandController userController;
     private final TelegramCommandController tradeController;
+    private final TelegramCommandController graphController;
 
     public BoddariBotHandler(@Value("${constant.telegram-boddaribot.access-token}") String token,
                              TelegramCommandController userController,
-                             TelegramCommandController tradeController) {
+                             TelegramCommandController tradeController,
+                             TelegramCommandController graphController) {
         this.token = token;
         this.userController = userController;
         this.tradeController = tradeController;
+        this.graphController = graphController;
     }
 
     @Override
@@ -49,6 +52,9 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
                         break;
                     case "/trade":
                         this.tradeController.runCommand(chatId, commands, this);
+                        break;
+                    case "/graph":
+                        this.graphController.runCommand(chatId, commands, this);
                         break;
                     default:
                         throw new BadRequestException("지원하지 않는 명령어입니다.");
