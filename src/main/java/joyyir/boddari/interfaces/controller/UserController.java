@@ -1,7 +1,6 @@
 package joyyir.boddari.interfaces.controller;
 
 import joyyir.boddari.domain.kimchi.KimchiTradeUser;
-import joyyir.boddari.domain.kimchi.TradeStatus;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategy;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategyFactory;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategyFactoryException;
@@ -107,9 +106,6 @@ public class UserController implements TelegramCommandController {
         if (user == null) {
             throw new BadRequestException("등록되지 않은 유저입니다.");
         }
-        if (user.getTradeStatus() != TradeStatus.STOP) {
-            throw new BadRequestException("트레이드 상태가 STOP 상태일 때만 변경할 수 있습니다.");
-        }
         Integer beforeKrwLimit = user.getKrwLimit();
         user.setKrwLimit(NumberUtils.toInt(commands[3]));
         KimchiTradeUser savedUser = userService.save(user);
@@ -122,11 +118,8 @@ public class UserController implements TelegramCommandController {
             if (user == null) {
                 throw new BadRequestException("등록되지 않은 유저입니다.");
             }
-            if (user.getTradeStatus() != TradeStatus.STOP) {
-                throw new BadRequestException("트레이드 상태가 STOP 상태일 때만 변경할 수 있습니다.");
-            }
             if (commands.length <= 3) {
-                throw new BadRequestException("트레이드 전략을 지정하세요. 트레이드 상태가 STOP인 경우에만 변경 가능합니다.\n(예시) /user set trade-strategy upper-and-lower-limit|2.5|5.0");
+                throw new BadRequestException("트레이드 전략을 지정하세요.\n(예시) /user set trade-strategy upper-and-lower-limit|2.5|5.0");
             }
             TradeStrategy tradeStrategy = tradeStrategyFactory.create(commands[3]);
             user.setTradeStrategy(commands[3]);
