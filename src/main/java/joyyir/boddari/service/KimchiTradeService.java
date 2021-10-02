@@ -170,6 +170,20 @@ public class KimchiTradeService {
         BigDecimal usdPriceKrw = usdPriceRepository.getUsdPriceKrw();
         BigDecimal orderQuantity = upbitBuyLimitKrw.divide(usdPriceKrw, 8, RoundingMode.FLOOR)
                                                    .divide(currentPrice, 8, RoundingMode.FLOOR);
+        boolean isSuccessChangeMarginType = binanceFutureTradeRepository.changeMarginType(binanceMarket,
+                                                                                          "ISOLATED",
+                                                                                          user.getBinanceAccessKey(),
+                                                                                          user.getBinanceSecretKey());
+        if (!isSuccessChangeMarginType) {
+            throw new RuntimeException("마진 타입을 '격리'로 변경하는데 실패했습니다. 바이낸스 앱에서 확인하세요.");
+        }
+        boolean isSuccessChangeLeverage = binanceFutureTradeRepository.changeInitialLeverage(binanceMarket,
+                                                                                             1,
+                                                                                             user.getBinanceAccessKey(),
+                                                                                             user.getBinanceSecretKey());
+        if (!isSuccessChangeLeverage) {
+            throw new RuntimeException("레버리지를 1배로 변경하는데 실패했습니다. 바이낸스 앱에서 확인하세요.");
+        }
         String binanceOrderId = binanceFutureTradeRepository.marketShort(binanceMarket, orderQuantity, user.getBinanceAccessKey(), user.getBinanceSecretKey());
         OrderDetail binanceOrderDetail = null;
         for (int i = 0; i < 5; i++) {
