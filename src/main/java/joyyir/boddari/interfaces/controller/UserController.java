@@ -148,7 +148,11 @@ public class UserController implements TelegramCommandController {
                 throw new BadRequestException("등록되지 않은 유저입니다.");
             }
             if (commands.length <= 3) {
-                throw new BadRequestException("트레이드 전략을 지정하세요.\n(예시) /user set trade-strategy upper-and-lower-limit|2.5|5.0");
+                throw new BadRequestException("트레이드 전략을 지정하세요.\n" +
+                                                  "\n" +
+                                                  "1. 상한선, 하한선 기반 매매\n" +
+                                                  "설명: 아래 예시처럼 설정하면 김프가 2.5% 이하일 경우 매수하고 5.0% 이상일 경우 매도합니다. /graph 명령으로 최근 김프 추이를 살펴본 뒤 적절한 값으로 설정하세요.\n" +
+                                                  "(예시) /user set trade-strategy upper-and-lower-limit|2.5|5.0");
             }
             TradeStrategy tradeStrategy = tradeStrategyFactory.create(commands[3]);
             user.setTradeStrategy(commands[3]);
