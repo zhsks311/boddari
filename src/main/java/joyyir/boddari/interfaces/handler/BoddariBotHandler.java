@@ -14,15 +14,18 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 public class BoddariBotHandler extends TelegramLongPollingBot {
     private final String token;
+    private final String allowedIp;
     private final TelegramCommandController userController;
     private final TelegramCommandController tradeController;
     private final TelegramCommandController graphController;
 
     public BoddariBotHandler(@Value("${constant.telegram-boddaribot.access-token}") String token,
+                             @Value("${constant.allowed-ip}") String allowedIp,
                              TelegramCommandController userController,
                              TelegramCommandController tradeController,
                              TelegramCommandController graphController) {
         this.token = token;
+        this.allowedIp = allowedIp;
         this.userController = userController;
         this.tradeController = tradeController;
         this.graphController = graphController;
@@ -89,7 +92,13 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
 
     private void help(Long chatId) {
         String message =
-            "처음 오신 분은 아래 절차에 따라 트레이딩을 시작하세요.\n" +
+                "처음 오신 분은 아래 절차에 따라 트레이딩을 시작하세요.\n" +
+                "\n" +
+                "사전 준비\n" +
+                "1. 업비트와 바이낸스에서 API Key를 생성하세요. 접근 허용 IP로 " + allowedIp + "를 추가하세요. 업비트 - 자산조회, 주문조회, 주문하기, 바이낸스 - Enable Reading, Enable Futures. Secret key 유출로부터 자산을 보호하기 위해 출금(Withdrawals)은 허용하지 마세요.\n" +
+                "2. 업비트 계정에 충분한 KRW를 준비하고, 바이낸스 선물(USDⓈ-M) 지갑에 충분한 USDT를 준비하세요.\n" +
+                "\n" +
+                "봇 세팅\n" +
                 "1. /user register 명령으로 유저 등록\n" +
                 "2. /user set krw-limit 명령으로 업비트 KRW 금액 설정\n" +
                 "3. /user set trade-strategy 명령으로 김프 트레이딩 전략 설정\n" +

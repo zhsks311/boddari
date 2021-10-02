@@ -29,3 +29,4 @@ constant:
     api-key: your-api-key
   graph-image-path: /your/graph/image/path
   graph-url: http://your-graph-url
+  allowed-ip: 219.254.120.63
