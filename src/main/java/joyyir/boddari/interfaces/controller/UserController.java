@@ -1,15 +1,12 @@
 package joyyir.boddari.interfaces.controller;
 
-import joyyir.boddari.domain.exchange.Balance;
-import joyyir.boddari.domain.exchange.BalanceRepository;
-import joyyir.boddari.domain.exchange.CurrencyType;
 import joyyir.boddari.domain.kimchi.KimchiTradeUser;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategy;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategyFactory;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategyFactoryException;
 import joyyir.boddari.interfaces.exception.BadRequestException;
 import joyyir.boddari.interfaces.handler.BoddariBotHandler;
-import joyyir.boddari.service.KimchiTradeHistoryService;
+import joyyir.boddari.service.BalanceService;
 import joyyir.boddari.service.KimchiTradeUserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,17 +14,14 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 @Slf4j
 @RestController
 @AllArgsConstructor
 public class UserController implements TelegramCommandController {
     private final KimchiTradeUserService userService;
-    private final KimchiTradeHistoryService tradeHistoryService;
     private final TradeStrategyFactory tradeStrategyFactory;
-    private final BalanceRepository upbitBalanceRepository;
-    private final BalanceRepository binanceFutureBalanceRepository;
+    private final BalanceService balanceService;
 
     @Override
     public void runCommand(Long chatId, String[] commands, BoddariBotHandler botHandler) throws BadRequestException {
@@ -90,20 +84,8 @@ public class UserController implements TelegramCommandController {
         BigDecimal upbitKrwAvailBalance;
         BigDecimal binanceUsdtAvailBalance;
         try {
-            upbitKrwAvailBalance = upbitBalanceRepository.getBalance(upbitAccessKey, upbitSecretKey)
-                                                         .stream()
-                                                         .filter(x -> CurrencyType.KRW.name().equals(x.getAsset()))
-                                                         .findFirst()
-                                                         .map(Balance::getAvailableBalance)
-                                                         .orElse(new BigDecimal(0))
-                                                         .setScale(0, RoundingMode.FLOOR);
-            binanceUsdtAvailBalance = binanceFutureBalanceRepository.getBalance(binanceAccessKey, binanceSecretKey)
-                                                                    .stream()
-                                                                    .filter(x -> CurrencyType.USDT.name().equals(x.getAsset()))
-                                                                    .findFirst()
-                                                                    .map(Balance::getAvailableBalance)
-                                                                    .orElse(new BigDecimal(0))
-                                                                    .setScale(4, RoundingMode.FLOOR);
+            upbitKrwAvailBalance = balanceService.getUpbitKrwAvailBalance(upbitAccessKey, upbitSecretKey);
+            binanceUsdtAvailBalance = balanceService.getBinanceUsdtAvailBalance(binanceAccessKey, binanceSecretKey);
         } catch (Exception e) {
             throw new BadRequestException("access key와 secret key가 올바른지, API Key 권한이 적절하게 설정 되었는지, 허용시킬 IP를 올바르게 설정했는지 확인해주세요. 오류 내용: " + e.getMessage());
         }
@@ -151,7 +133,7 @@ public class UserController implements TelegramCommandController {
                 throw new BadRequestException("트레이드 전략을 지정하세요.\n" +
                                                   "\n" +
                                                   "1. 상한선, 하한선 기반 매매\n" +
-                                                  "설명: 아래 예시처럼 설정하면 김프가 2.5% 이하일 경우 매수하고 5.0% 이상일 경우 매도합니다. /graph 명령으로 최근 김프 추이를 살펴본 뒤 적절한 값으로 설정하세요.\n" +
+                                                  "아래 예시처럼 설정하면 김프가 2.5% 이하일 경우 매수하고 5.0% 이상일 경우 매도합니다. /graph 명령으로 최근 김프 추이를 살펴본 뒤 적절한 값으로 설정하세요.\n" +
                                                   "(예시) /user set trade-strategy upper-and-lower-limit|2.5|5.0");
             }
             TradeStrategy tradeStrategy = tradeStrategyFactory.create(commands[3]);

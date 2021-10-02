@@ -19,6 +19,7 @@ import java.util.UUID;
 public class KimchiTradeUserService {
     private final KimchiTradeUserRepository kimchiTradeUserRepository;
     private final KimchiTradeHistoryService tradeHistoryService;
+    private final BalanceService balanceService;
 
     public KimchiTradeUser findUserById(String userId) {
         return kimchiTradeUserRepository.findById(userId)
@@ -29,11 +30,12 @@ public class KimchiTradeUserService {
         return kimchiTradeUserRepository.findAllByTradeStatus(tradeStatus);
     }
 
-    public UserAndTradeHistory startNewTrade(String userId) {
+    public UserAndTradeHistory startNewTrade(String userId) throws BadRequestException {
         KimchiTradeUser user = findUserById(userId);
         if (user == null) {
-            throw new RuntimeException("등록되지 않은 유저입니다.");
+            throw new BadRequestException("등록되지 않은 유저입니다.");
         }
+        balanceService.checkSufficientBalance(user);
         String newTradeId = UUID.randomUUID().toString();
         KimchiTradeUser savedUser = setUserTradeStatus(user, TradeStatus.START, newTradeId);
         KimchiTradeHistory savedTradeHistory = tradeHistoryService.saveNewHistory(userId, newTradeId, KimchiTradeStatus.WAITING);
