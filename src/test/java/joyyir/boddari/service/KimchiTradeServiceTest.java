@@ -17,7 +17,7 @@ class KimchiTradeServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.service = new KimchiTradeService(null, null, null, null, null, null, null, null);
+        this.service = new KimchiTradeService(null, null, null, null, null, null, null, null, null);
     }
 
     @Test

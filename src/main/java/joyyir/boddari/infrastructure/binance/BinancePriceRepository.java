@@ -19,7 +19,7 @@ public class BinancePriceRepository implements PriceRepository {
     @Override
     public BigDecimal getCurrentPrice(MarketType marketType) {
         String marketTypeString = BinanceMarketTypeConverter.convert(marketType);
-        ResponseEntity<PriceTickerDTO> result = restTemplate.getForEntity("https://api.binance.com/api/v3/ticker/price?symbol=" + marketTypeString, PriceTickerDTO.class);
+        ResponseEntity<PriceTickerDTO> result = restTemplate.getForEntity("https://fapi.binance.com/fapi/v1/ticker/price?symbol=" + marketTypeString, PriceTickerDTO.class);
         return Objects.requireNonNull(result.getBody())
                       .getPrice();
     }

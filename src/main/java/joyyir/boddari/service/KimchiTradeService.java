@@ -6,6 +6,7 @@ import joyyir.boddari.domain.exchange.MarketType;
 import joyyir.boddari.domain.exchange.OrderDetail;
 import joyyir.boddari.domain.exchange.OrderRepository;
 import joyyir.boddari.domain.exchange.OrderStatus;
+import joyyir.boddari.domain.exchange.PriceRepository;
 import joyyir.boddari.domain.exchange.TradeRepository;
 import joyyir.boddari.domain.exchange.UsdPriceRepository;
 import joyyir.boddari.domain.kimchi.KimchiTradeHistory;
@@ -39,6 +40,7 @@ public class KimchiTradeService {
     private final OrderRepository binanceFutureOrderRepository;
     private final FutureTradeRepository binanceFutureTradeRepository;
     private final UsdPriceRepository usdPriceRepository;
+    private final PriceRepository binancePriceRepository;
 
     @Transactional
     public void kimchiTrade(KimchiTradeUser user, BoddariBotHandler botHandler) {
@@ -164,7 +166,11 @@ public class KimchiTradeService {
             sleep(1000);
         }
         MarketType binanceMarket = currencyType.getUsdtMarket();
-        String binanceOrderId = binanceFutureTradeRepository.marketShort(binanceMarket, upbitOrderDetail.getOrderQty(), user.getBinanceAccessKey(), user.getBinanceSecretKey());
+        BigDecimal currentPrice = binancePriceRepository.getCurrentPrice(binanceMarket);
+        BigDecimal usdPriceKrw = usdPriceRepository.getUsdPriceKrw();
+        BigDecimal orderQuantity = upbitBuyLimitKrw.divide(usdPriceKrw, 8, RoundingMode.FLOOR)
+                                                   .divide(currentPrice, 8, RoundingMode.FLOOR);
+        String binanceOrderId = binanceFutureTradeRepository.marketShort(binanceMarket, orderQuantity, user.getBinanceAccessKey(), user.getBinanceSecretKey());
         OrderDetail binanceOrderDetail = null;
         for (int i = 0; i < 5; i++) {
             binanceOrderDetail = binanceFutureOrderRepository.getOrderDetail(binanceMarket, binanceOrderId, user.getBinanceAccessKey(), user.getBinanceSecretKey());
