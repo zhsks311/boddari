@@ -95,7 +95,11 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
                 "처음 오신 분은 아래 절차에 따라 트레이딩을 시작하세요.\n" +
                 "\n" +
                 "사전 준비\n" +
-                "1. 업비트와 바이낸스에서 API Key를 생성하세요. 접근 허용 IP로 " + allowedIp + "를 추가하세요. 업비트 - 자산조회, 주문조회, 주문하기, 바이낸스 - Enable Reading, Enable Futures. Secret key 유출로부터 자산을 보호하기 위해 출금(Withdrawals)은 허용하지 마세요.\n" +
+                "1. 업비트와 바이낸스에서 API Key를 생성하세요.\n" +
+                "  - 접근 허용 IP로 " + allowedIp + "를 추가하세요.\n" +
+                "  - Secret key 유출로부터 자산을 보호하기 위해 출금(Withdrawals)은 허용하지 마세요.\n" +
+                "  - 업비트 - 자산조회, 주문조회, 주문하기\n" +
+                "  - 바이낸스 - Enable Reading, Enable Futures\n" +
                 "2. 업비트 계정에 충분한 KRW를 준비하고, 바이낸스 선물(USDⓈ-M) 지갑에 충분한 USDT를 준비하세요.\n" +
                 "\n" +
                 "봇 세팅\n" +
@@ -104,22 +108,21 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
                 "3. /user set trade-strategy 명령으로 김프 트레이딩 전략 설정\n" +
                 "4. /trade start 명령으로 트레이딩 시작\n" +
                 "\n" +
+                "명령어 목록\n" +
                 "/user register {업비트 access key} {업비트 secret key} {바이낸스 access key} {바이낸스 secret key} : 유저 등록\n" +
                 "/user unregister : 유저 정보 제거\n" +
                 "/user info : 유저 정보 조회\n" +
                 "/user set krw-limit {금액} : 김프 거래를 위한 업비트 KRW 금액 변경\n" +
                 "/user set trade-strategy {설정값} : 김프 트레이딩 전략 설정\n" +
-                "\n" +
                 "/trade start : 새로운 트레이딩 시작\n" +
                 "/trade stop : 현재 트레이딩 종료\n" +
                 "/trade pause : 현재 트레이딩 일시 중지\n" +
                 "/trade resume : 일시 중지된 트레이딩 재개\n" +
                 "/trade status : 현재 진행 중인 트레이딩 상태 확인\n" +
                 "/trade history : 최근 n일 동안 진행된 트레이드 히스토리 확인 (예시) /trade history 5\n" +
-                "\n" +
                 "/graph : 최근 7일 김프 그래프 확인\n" +
                 "\n" +
-                "문의 사항은 joyyir@naver.com으로 보내주세요.\n" +
+                "문의 사항은 Telegram @joyyir2로 문의 주세요.\n" +
                 "";
         sendMessage(chatId, message);
     }
