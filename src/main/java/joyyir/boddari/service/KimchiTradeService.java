@@ -56,7 +56,7 @@ public class KimchiTradeService {
             KimchiTradeHistory firstHistory = tradeHistory.get(tradeHistory.size() - 1);
             KimchiTradeHistory lastHistory = tradeHistory.get(0);
             if (lastHistory.getStatus() == KimchiTradeStatus.ERROR) {
-                log.info("[jyjang] 마지막 트레이드에서 오류가 발생했습니다. 오류를 확인하세요.");
+//                log.info("[jyjang] 마지막 트레이드에서 오류가 발생했습니다. 오류를 확인하세요.");
                 return;
             }
             if (lastHistory.getStatus() == KimchiTradeStatus.FINISHED) {
@@ -64,7 +64,7 @@ public class KimchiTradeService {
                                                                                .getTradeHistory();
                 firstHistory = lastHistory = startedTradeHistory;
             }
-            log.info("[jyjang] " + firstHistory.getTimestamp() + "에 시작된 trade의(tradeId: " + user.getCurrentTradeId() + ") 현재 상태: " + lastHistory.getStatus().name());
+//            log.info("[jyjang] " + firstHistory.getTimestamp() + "에 시작된 trade의(tradeId: " + user.getCurrentTradeId() + ") 현재 상태: " + lastHistory.getStatus().name());
             if (lastHistory.getStatus() == KimchiTradeStatus.WAITING) {
                 checkBuyTimingAndTrade(user, tradeStrategy, lastHistory.getTradeId(), botHandler);
             } else if (lastHistory.getStatus() == KimchiTradeStatus.STARTED) {
@@ -83,7 +83,7 @@ public class KimchiTradeService {
                                         BoddariBotHandler botHandler) {
         TradeDecision decision = tradeStrategy.decideBuy();
         if (decision.isTrade()) {
-            log.info("[jyjang] 조건이 충족되어 김프 거래를 시작합니다. {}", decision);
+//            log.info("[jyjang] 조건이 충족되어 김프 거래를 시작합니다. {}", decision);
             TradeResult tradeResult = kimchiTradeBuy(decision.getCurrencyType(), new BigDecimal(user.getKrwLimit()), user);
             KimchiTradeHistory buyHistory = tradeHistoryService.saveNewHistory(user.getUserId(),
                                                                                tradeId,
@@ -102,7 +102,7 @@ public class KimchiTradeService {
                                          BoddariBotHandler botHandler) {
         TradeDecision decision = tradeStrategy.decideSell(lastHistory);
         if (decision.isTrade()) {
-            log.info("[jyjang] 조건이 충족되어 김프 거래를 마무리합니다. {}", decision);
+//            log.info("[jyjang] 조건이 충족되어 김프 거래를 마무리합니다. {}", decision);
             String tradeId = lastHistory.getTradeId();
             TradeResult tradeResult = kimchiTradeSell(decision.getCurrencyType(),
                                                       lastHistory.getBuyQuantity(),
@@ -157,7 +157,7 @@ public class KimchiTradeService {
         for (int i = 0; i < 5; i++) {
             upbitOrderDetail = upbitOrderRepository.getOrderDetail(null, upbitOrderId, user.getUpbitAccessKey(), user.getUpbitSecretKey());
             if (upbitOrderDetail.getOrderStatus() == OrderStatus.COMPLETED) {
-                log.info("[jyjang] 업비트 시장가 매수 완료. {} 마켓에서 {}개 매수", upbitMarket.name(), upbitOrderDetail.getOrderQty());
+//                log.info("[jyjang] 업비트 시장가 매수 완료. {} 마켓에서 {}개 매수", upbitMarket.name(), upbitOrderDetail.getOrderQty());
                 break;
             }
             if (i == 4) {
@@ -189,7 +189,7 @@ public class KimchiTradeService {
         for (int i = 0; i < 5; i++) {
             binanceOrderDetail = binanceFutureOrderRepository.getOrderDetail(binanceMarket, binanceOrderId, user.getBinanceAccessKey(), user.getBinanceSecretKey());
             if (binanceOrderDetail.getOrderStatus() == OrderStatus.COMPLETED) {
-                log.info("[jyjang] 바이낸스 시장가 숏 완료. {} 마켓에서 {}개 매도", binanceMarket.name(), binanceOrderDetail.getOrderQty());
+//                log.info("[jyjang] 바이낸스 시장가 숏 완료. {} 마켓에서 {}개 매도", binanceMarket.name(), binanceOrderDetail.getOrderQty());
                 break;
             }
             if (i == 4) {
@@ -207,7 +207,7 @@ public class KimchiTradeService {
         for (int i = 0; i < 5; i++) {
             upbitOrderDetail = upbitOrderRepository.getOrderDetail(null, upbitOrderId, user.getUpbitAccessKey(), user.getUpbitSecretKey());
             if (upbitOrderDetail.getOrderStatus() == OrderStatus.COMPLETED) {
-                log.info("[jyjang] 업비트 시장가 매도 완료. {} 마켓에서 {}개 매도", upbitMarket.name(), upbitOrderDetail.getOrderQty());
+//                log.info("[jyjang] 업비트 시장가 매도 완료. {} 마켓에서 {}개 매도", upbitMarket.name(), upbitOrderDetail.getOrderQty());
                 break;
             }
             if (i == 4) {
@@ -221,7 +221,7 @@ public class KimchiTradeService {
         for (int i = 0; i < 5; i++) {
             binanceOrderDetail = binanceFutureOrderRepository.getOrderDetail(binanceMarket, binanceOrderId, user.getBinanceAccessKey(), user.getBinanceSecretKey());
             if (binanceOrderDetail.getOrderStatus() == OrderStatus.COMPLETED) {
-                log.info("[jyjang] 바이낸스 시장가 롱 완료. {} 마켓에서 {}개 매수", binanceMarket.name(), binanceOrderDetail.getOrderQty());
+//                log.info("[jyjang] 바이낸스 시장가 롱 완료. {} 마켓에서 {}개 매수", binanceMarket.name(), binanceOrderDetail.getOrderQty());
                 break;
             }
             if (i == 4) {

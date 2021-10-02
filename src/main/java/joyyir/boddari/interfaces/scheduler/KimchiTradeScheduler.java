@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -25,6 +26,10 @@ public class KimchiTradeScheduler {
     @Scheduled(fixedRate = 1000 * 60)
     void kimchiTradeScheduler() {
         List<KimchiTradeUser> tradeUsers = kimchiTradeUserService.findAllByTradeStatus(TradeStatus.START);
+        String tradingUsers = tradeUsers.stream()
+                                        .map(KimchiTradeUser::getUserId)
+                                        .collect(Collectors.joining(", "));
+        log.info("[jyjang] 트레이딩 중인 유저 목록: " + tradingUsers);
         for (KimchiTradeUser tradeUser : tradeUsers) {
             tradeExecutorService.execute(() -> kimchiTradeService.kimchiTrade(tradeUser, botHandler));
         }
