@@ -40,7 +40,7 @@ public class KimchiTradeService {
     private final OrderRepository binanceFutureOrderRepository;
     private final FutureTradeRepository binanceFutureTradeRepository;
     private final UsdPriceRepository usdPriceRepository;
-    private final PriceRepository binancePriceRepository;
+    private final PriceRepository binanceFuturePriceRepository;
 
     @Transactional
     public void kimchiTrade(KimchiTradeUser user, BoddariBotHandler botHandler) {
@@ -166,7 +166,7 @@ public class KimchiTradeService {
             sleep(1000);
         }
         MarketType binanceMarket = currencyType.getUsdtMarket();
-        BigDecimal currentPrice = binancePriceRepository.getCurrentPrice(binanceMarket);
+        BigDecimal currentPrice = binanceFuturePriceRepository.getCurrentPrice(binanceMarket);
         BigDecimal usdPriceKrw = usdPriceRepository.getUsdPriceKrw();
         BigDecimal orderQuantity = upbitBuyLimitKrw.divide(usdPriceKrw, 8, RoundingMode.FLOOR)
                                                    .divide(currentPrice, 8, RoundingMode.FLOOR);

@@ -33,6 +33,20 @@ public class UpbitUtil {
         }
     }
 
+    public static String getAuthenticationToken(String accessKey, String secretKey) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secretKey);
+            String jwtToken = JWT.create()
+                                 .withClaim("access_key", accessKey)
+                                 .withClaim("nonce", UUID.randomUUID().toString())
+                                 .sign(algorithm);
+
+            return "Bearer " + jwtToken;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static String toQueryString(Map<String, String> params) {
         List<String> queryElements = new ArrayList<>();
 

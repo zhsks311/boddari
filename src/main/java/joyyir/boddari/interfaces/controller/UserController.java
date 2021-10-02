@@ -1,5 +1,8 @@
 package joyyir.boddari.interfaces.controller;
 
+import joyyir.boddari.domain.exchange.Balance;
+import joyyir.boddari.domain.exchange.BalanceRepository;
+import joyyir.boddari.domain.exchange.CurrencyType;
 import joyyir.boddari.domain.kimchi.KimchiTradeUser;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategy;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategyFactory;
@@ -13,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Slf4j
 @RestController
@@ -21,6 +26,8 @@ public class UserController implements TelegramCommandController {
     private final KimchiTradeUserService userService;
     private final KimchiTradeHistoryService tradeHistoryService;
     private final TradeStrategyFactory tradeStrategyFactory;
+    private final BalanceRepository upbitBalanceRepository;
+    private final BalanceRepository binanceFutureBalanceRepository;
 
     @Override
     public void runCommand(Long chatId, String[] commands, BoddariBotHandler botHandler) throws BadRequestException {
@@ -74,19 +81,41 @@ public class UserController implements TelegramCommandController {
             throw new BadRequestException("이미 등록된 유저입니다.");
         }
         if (commands.length != 6) {
-            throw new BadRequestException("잘못된 명령입니다. (사용법) /user register {업비트 access key} {업비트 secret key} {바이낸스 access key} {바이낸스 secret key}");
+            throw new BadRequestException("잘못된 명령입니다.\n(사용법) /user register {업비트 access key} {업비트 secret key} {바이낸스 access key} {바이낸스 secret key}");
         }
-        KimchiTradeUser newUser = userService.register(userId, commands[2], commands[3], commands[4], commands[5]);
-        botHandler.sendMessage(chatId, "유저 등록 성공. 환영합니다. " + newUser);
+        String upbitAccessKey = commands[2];
+        String upbitSecretKey = commands[3];
+        String binanceAccessKey = commands[4];
+        String binanceSecretKey = commands[5];
+        BigDecimal upbitKrwAvailBalance;
+        BigDecimal binanceUsdtAvailBalance;
+        try {
+            upbitKrwAvailBalance = upbitBalanceRepository.getBalance(upbitAccessKey, upbitSecretKey)
+                                                         .stream()
+                                                         .filter(x -> CurrencyType.KRW.name().equals(x.getAsset()))
+                                                         .findFirst()
+                                                         .map(Balance::getAvailableBalance)
+                                                         .orElse(new BigDecimal(0))
+                                                         .setScale(0, RoundingMode.FLOOR);
+            binanceUsdtAvailBalance = binanceFutureBalanceRepository.getBalance(binanceAccessKey, binanceSecretKey)
+                                                                    .stream()
+                                                                    .filter(x -> CurrencyType.USDT.name().equals(x.getAsset()))
+                                                                    .findFirst()
+                                                                    .map(Balance::getAvailableBalance)
+                                                                    .orElse(new BigDecimal(0))
+                                                                    .setScale(4, RoundingMode.FLOOR);
+        } catch (Exception e) {
+            throw new BadRequestException("access key와 secret key가 올바른지, API Key 권한이 적절하게 설정 되었는지, 허용시킬 IP를 올바르게 설정했는지 확인해주세요. 오류 내용: " + e.getMessage());
+        }
+        KimchiTradeUser newUser = userService.register(userId, upbitAccessKey, upbitSecretKey, binanceAccessKey, binanceSecretKey);
+        botHandler.sendMessage(chatId, "유저 등록 성공. 환영합니다.\n" +
+            "유저 ID: " + newUser.getUserId() + "\n" +
+            "업비트 KRW 이용 가능 잔고: " + upbitKrwAvailBalance + "원\n" +
+            "바이낸스 선물 USDT 이용 가능 잔고: " + binanceUsdtAvailBalance + "달러");
     }
 
     private void unregister(BoddariBotHandler botHandler, Long chatId, String userId) throws BadRequestException {
-        KimchiTradeUser user = userService.findUserById(userId);
-        if (user == null) {
-            throw new BadRequestException("등록되지 않은 유저입니다.");
-        }
-        userService.delete(user);
-        tradeHistoryService.deleteByUserId(userId);
+        userService.delete(userId);
         botHandler.sendMessage(chatId, "유저 제거 성공. 이용해주셔서 감사합니다.");
     }
 

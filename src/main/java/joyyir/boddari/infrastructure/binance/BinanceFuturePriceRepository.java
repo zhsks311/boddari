@@ -13,7 +13,7 @@ import java.util.Objects;
 
 @Repository
 @AllArgsConstructor
-public class BinancePriceRepository implements PriceRepository {
+public class BinanceFuturePriceRepository implements PriceRepository {
     private final RestTemplate restTemplate;
 
     @Override

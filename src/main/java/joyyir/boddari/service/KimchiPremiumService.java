@@ -14,13 +14,13 @@ import java.math.RoundingMode;
 @AllArgsConstructor
 public class KimchiPremiumService {
     private final PriceRepository upbitPriceRepository;
-    private final PriceRepository binancePriceRepository;
+    private final PriceRepository binanceFuturePriceRepository;
     private final UsdPriceRepository usdPriceRepository;
 
     public KimchiPremiumData getKimchiPremium(CurrencyType currency) {
         BigDecimal usdPriceKrw = usdPriceRepository.getUsdPriceKrw();
         BigDecimal upbitPriceByKrw = upbitPriceRepository.getCurrentPrice(currency.getKrwMarket());
-        BigDecimal binancePriceByUsdt = binancePriceRepository.getCurrentPrice(currency.getUsdtMarket());
+        BigDecimal binancePriceByUsdt = binanceFuturePriceRepository.getCurrentPrice(currency.getUsdtMarket());
         BigDecimal binancePriceByKrw = binancePriceByUsdt.multiply(usdPriceKrw);
         BigDecimal kimchiPremium = upbitPriceByKrw.divide(binancePriceByKrw, 5, RoundingMode.HALF_UP)
                                                   .subtract(BigDecimal.ONE)

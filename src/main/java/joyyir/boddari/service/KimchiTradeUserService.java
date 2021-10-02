@@ -6,9 +6,11 @@ import joyyir.boddari.domain.kimchi.KimchiTradeUser;
 import joyyir.boddari.domain.kimchi.KimchiTradeUserRepository;
 import joyyir.boddari.domain.kimchi.TradeStatus;
 import joyyir.boddari.domain.user.UserAndTradeHistory;
+import joyyir.boddari.interfaces.exception.BadRequestException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,8 +45,14 @@ public class KimchiTradeUserService {
         return kimchiTradeUserRepository.save(new KimchiTradeUser(userId, null, TradeStatus.STOP, null, null, upbitAccessKey, upbitSecretKey, binanceAccessKey, binanceSecretKey));
     }
 
-    public void delete(KimchiTradeUser user) {
+    @Transactional
+    public void delete(String userId) throws BadRequestException {
+        KimchiTradeUser user = findUserById(userId);
+        if (user == null) {
+            throw new BadRequestException("등록되지 않은 유저입니다.");
+        }
         kimchiTradeUserRepository.delete(user);
+        tradeHistoryService.deleteByUserId(userId);
     }
 
     public KimchiTradeUser setUserTradeStatus(KimchiTradeUser user, TradeStatus status, String tradeId) {
