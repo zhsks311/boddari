@@ -29,7 +29,8 @@ class KimchiTradeServiceTest {
                                                   new OrderDetail(OrderStatus.COMPLETED,
                                                                   new BigDecimal("440.5"),
                                                                   new BigDecimal("0.9024"),
-                                                                  new BigDecimal("0.15900287")));
+                                                                  new BigDecimal("0.15900287")),
+                                                  null);
         KimchiTradeHistory buyHistory = new KimchiTradeHistory(null,
                                                                null,
                                                                null,

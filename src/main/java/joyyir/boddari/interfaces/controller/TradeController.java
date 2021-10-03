@@ -18,6 +18,8 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -127,10 +129,13 @@ public class TradeController implements TelegramCommandController {
                                                     .filter(x -> x.getStatus() == KimchiTradeStatus.STARTED)
                                                     .findFirst()
                                                     .orElse(null);
+        KimchiPremiumData kimchiPremium = null;
         BigDecimal profitRate = null;
         BigDecimal profitAmount = null;
+        DecimalFormat decimalFormat = (DecimalFormat) NumberFormat.getNumberInstance();
+        decimalFormat.setPositivePrefix("+");
         if (buyHistory != null) {
-            KimchiPremiumData kimchiPremium = kimchiPremiumService.getKimchiPremium(buyHistory.getCurrencyType());
+            kimchiPremium = kimchiPremiumService.getKimchiPremium(buyHistory.getCurrencyType());
             profitRate = tradeHistoryService.getProfitRate(buyHistory, kimchiPremium);
             profitAmount = tradeHistoryService.getProfitAmount(buyHistory, profitRate);
         }
@@ -138,6 +143,7 @@ public class TradeController implements TelegramCommandController {
         botHandler.sendMessage(chatId,
                                "현재 트레이드 id: " + user.getCurrentTradeId() + "\n" +
                                "현재 트레이드 상태: " + tradeHistory.get(tradeHistory.size() - 1).getStatus() + "\n" +
+                               (buyHistory != null ? ("현재 김프: " + kimchiPremium.getKimchiPremium() + "% (" + decimalFormat.format(kimchiPremium.getKimchiPremium().subtract(BigDecimal.valueOf(buyHistory.getKimchiPremium()))) + "%)\n") : "") +
                                (buyHistory != null ? ("현재 기준 이익: " + profitAmount + "원 (" + profitRate + "%)\n") : "") +
                                "\n" +
                                "현재 트레이드 히스토리\n" +
