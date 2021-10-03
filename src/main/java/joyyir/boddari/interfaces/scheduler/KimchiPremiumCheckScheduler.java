@@ -28,7 +28,7 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class KimchiPremiumCheckScheduler {
-    private final static List<CurrencyType> TARGET_CURRENCIES
+    public final static List<CurrencyType> TARGET_CURRENCIES
         = List.of(CurrencyType.BTC,
                   CurrencyType.ETH,
                   CurrencyType.XRP,

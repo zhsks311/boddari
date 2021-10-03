@@ -11,11 +11,11 @@ import joyyir.boddari.service.KimchiTradeHistoryService;
 import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.List;
+
+import static joyyir.boddari.interfaces.scheduler.KimchiPremiumCheckScheduler.TARGET_CURRENCIES;
 
 @AllArgsConstructor
 public class LowerAndProfitLimitStrategy implements TradeStrategy {
-    private final static List<CurrencyType> TARGET_CURRENCIES = List.of(CurrencyType.BTC, CurrencyType.ETH, CurrencyType.XRP, CurrencyType.ETC);
     private final KimchiPremiumService kimchiPremiumService;
     private final KimchiTradeHistoryService kimchiTradeHistoryService;
     private final BigDecimal lowerLimit;
