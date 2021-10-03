@@ -1,5 +1,6 @@
 package joyyir.boddari.interfaces.controller;
 
+import joyyir.boddari.domain.kimchi.KimchiPremiumData;
 import joyyir.boddari.domain.kimchi.KimchiTradeHistory;
 import joyyir.boddari.domain.kimchi.KimchiTradeStatus;
 import joyyir.boddari.domain.kimchi.KimchiTradeUser;
@@ -7,6 +8,7 @@ import joyyir.boddari.domain.kimchi.TradeStatus;
 import joyyir.boddari.domain.user.UserAndTradeHistory;
 import joyyir.boddari.interfaces.exception.BadRequestException;
 import joyyir.boddari.interfaces.handler.BoddariBotHandler;
+import joyyir.boddari.service.KimchiPremiumService;
 import joyyir.boddari.service.KimchiTradeHistoryService;
 import joyyir.boddari.service.KimchiTradeUserService;
 import lombok.AllArgsConstructor;
@@ -15,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 public class TradeController implements TelegramCommandController {
     private final KimchiTradeUserService userService;
     private final KimchiTradeHistoryService tradeHistoryService;
+    private final KimchiPremiumService kimchiPremiumService;
 
     @Override
     public void runCommand(Long chatId, String[] commands, BoddariBotHandler botHandler) throws BadRequestException {
@@ -119,10 +123,22 @@ public class TradeController implements TelegramCommandController {
             return;
         }
         List<KimchiTradeHistory> tradeHistory = tradeHistoryService.findTradeHistory(userId, user.getCurrentTradeId());
+        KimchiTradeHistory buyHistory = tradeHistory.stream()
+                                                    .filter(x -> x.getStatus() == KimchiTradeStatus.STARTED)
+                                                    .findFirst()
+                                                    .orElse(null);
+        BigDecimal profitRate = null;
+        BigDecimal profitAmount = null;
+        if (buyHistory != null) {
+            KimchiPremiumData kimchiPremium = kimchiPremiumService.getKimchiPremium(buyHistory.getCurrencyType());
+            profitRate = tradeHistoryService.getProfitRate(buyHistory, kimchiPremium);
+            profitAmount = tradeHistoryService.getProfitAmount(buyHistory, profitRate);
+        }
         Collections.reverse(tradeHistory);
         botHandler.sendMessage(chatId,
                                "현재 트레이드 id: " + user.getCurrentTradeId() + "\n" +
                                "현재 트레이드 상태: " + tradeHistory.get(tradeHistory.size() - 1).getStatus() + "\n" +
+                               (buyHistory != null ? ("현재 기준 이익: " + profitAmount + "원 (" + profitRate + "%)\n") : "") +
                                "\n" +
                                "현재 트레이드 히스토리\n" +
                                toTradeHistoryString(tradeHistory));
