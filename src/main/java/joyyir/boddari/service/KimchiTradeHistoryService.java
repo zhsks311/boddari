@@ -32,7 +32,7 @@ public class KimchiTradeHistoryService {
                                                                         LocalDateTime.now(),
                                                                         status,
                                                                         decision.getCurrencyType(),
-                                                                        decision.getKimchiPremium().doubleValue(),
+                                                                        tradeResult.getKimchiPremium().doubleValue(),
                                                                         tradeResult.getBuyOrderDetail().getOrderQty(),
                                                                         tradeResult.getBuyOrderDetail().getAveragePrice(),
                                                                         tradeResult.getBuyOrderDetail().getFee(),

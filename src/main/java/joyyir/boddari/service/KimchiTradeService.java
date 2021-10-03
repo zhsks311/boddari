@@ -73,7 +73,7 @@ public class KimchiTradeService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             tradeHistoryService.saveNewHistory(userId, user.getCurrentTradeId(), KimchiTradeStatus.ERROR);
-            botHandler.sendMessage(Long.valueOf(userId), e.getMessage());
+            botHandler.sendMessage(Long.valueOf(userId), "오류가 발생했습니다! 오류 확인 후에 trade를 STOP하고 다시 START 해주세요.\n오류 내용: " + e.getMessage());
         }
     }
 
@@ -197,7 +197,7 @@ public class KimchiTradeService {
             }
             sleep(1000);
         }
-        return new TradeResult(upbitOrderDetail, binanceOrderDetail);
+        return new TradeResult(upbitOrderDetail, binanceOrderDetail, usdPriceKrw);
     }
 
     private TradeResult kimchiTradeSell(CurrencyType currencyType, BigDecimal buyQuantity, BigDecimal shortQuantity, KimchiTradeUser user) {
@@ -229,7 +229,7 @@ public class KimchiTradeService {
             }
             sleep(1000);
         }
-        return new TradeResult(upbitOrderDetail, binanceOrderDetail);
+        return new TradeResult(upbitOrderDetail, binanceOrderDetail, usdPriceRepository.getUsdPriceKrw());
     }
 
     private void sleep(long millis) {

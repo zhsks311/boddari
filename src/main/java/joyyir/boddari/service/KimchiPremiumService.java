@@ -26,6 +26,6 @@ public class KimchiPremiumService {
                                                   .subtract(BigDecimal.ONE)
                                                   .multiply(BigDecimal.valueOf(100L))
                                                   .setScale(1, RoundingMode.HALF_UP);
-        return new KimchiPremiumData(currency, kimchiPremium);
+        return new KimchiPremiumData(currency, kimchiPremium, binancePriceByUsdt);
     }
 }
