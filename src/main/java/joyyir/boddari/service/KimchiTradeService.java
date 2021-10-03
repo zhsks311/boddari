@@ -84,15 +84,19 @@ public class KimchiTradeService {
         TradeDecision decision = tradeStrategy.decideBuy();
         if (decision.isTrade()) {
 //            log.info("[jyjang] 조건이 충족되어 김프 거래를 시작합니다. {}", decision);
-            TradeResult tradeResult = kimchiTradeBuy(decision.getCurrencyType(), new BigDecimal(user.getKrwLimit()), user);
-            KimchiTradeHistory buyHistory = tradeHistoryService.saveNewHistory(user.getUserId(),
-                                                                               tradeId,
-                                                                               KimchiTradeStatus.STARTED,
-                                                                               decision,
-                                                                               tradeResult,
-                                                                               null);
-            botHandler.sendMessage(Long.valueOf(user.getUserId()), buyHistory.buyDescription());
+            tradeBuy(decision, user, tradeId, botHandler);
         }
+    }
+
+    private void tradeBuy(TradeDecision decision, KimchiTradeUser user, String tradeId, BoddariBotHandler botHandler) {
+        TradeResult tradeResult = kimchiTradeBuy(decision.getCurrencyType(), new BigDecimal(user.getKrwLimit()), user);
+        KimchiTradeHistory buyHistory = tradeHistoryService.saveNewHistory(user.getUserId(),
+                                                                           tradeId,
+                                                                           KimchiTradeStatus.STARTED,
+                                                                           decision,
+                                                                           tradeResult,
+                                                                           null);
+        botHandler.sendMessage(Long.valueOf(user.getUserId()), buyHistory.buyDescription());
     }
 
     private void checkSellTimingAndTrade(KimchiTradeUser user,
@@ -103,24 +107,32 @@ public class KimchiTradeService {
         TradeDecision decision = tradeStrategy.decideSell(lastHistory);
         if (decision.isTrade()) {
 //            log.info("[jyjang] 조건이 충족되어 김프 거래를 마무리합니다. {}", decision);
-            String tradeId = lastHistory.getTradeId();
-            TradeResult tradeResult = kimchiTradeSell(decision.getCurrencyType(),
-                                                      lastHistory.getBuyQuantity(),
-                                                      lastHistory.getShortQuantity(),
-                                                      user);
-            KimchiTradeHistory buyHistory = tradeHistory.stream()
-                                                        .filter(x -> x.getStatus() == KimchiTradeStatus.STARTED)
-                                                        .findFirst()
-                                                        .orElse(null);
-            KimchiTradeProfit profit = calculateProfit(tradeResult, buyHistory, usdPriceRepository.getUsdPriceKrw());
-            KimchiTradeHistory sellHistory = tradeHistoryService.saveNewHistory(user.getUserId(),
-                                                                                tradeId,
-                                                                                KimchiTradeStatus.FINISHED,
-                                                                                decision,
-                                                                                tradeResult,
-                                                                                profit);
-            botHandler.sendMessage(Long.valueOf(user.getUserId()), sellHistory.sellDescription());
+            tradeSell(decision, user, tradeHistory, lastHistory, botHandler);
         }
+    }
+
+    private void tradeSell(TradeDecision decision,
+                           KimchiTradeUser user,
+                           List<KimchiTradeHistory> tradeHistory,
+                           KimchiTradeHistory lastHistory,
+                           BoddariBotHandler botHandler) {
+        String tradeId = lastHistory.getTradeId();
+        TradeResult tradeResult = kimchiTradeSell(decision.getCurrencyType(),
+                                                  lastHistory.getBuyQuantity(),
+                                                  lastHistory.getShortQuantity(),
+                                                  user);
+        KimchiTradeHistory buyHistory = tradeHistory.stream()
+                                                    .filter(x -> x.getStatus() == KimchiTradeStatus.STARTED)
+                                                    .findFirst()
+                                                    .orElse(null);
+        KimchiTradeProfit profit = calculateProfit(tradeResult, buyHistory, usdPriceRepository.getUsdPriceKrw());
+        KimchiTradeHistory sellHistory = tradeHistoryService.saveNewHistory(user.getUserId(),
+                                                                            tradeId,
+                                                                            KimchiTradeStatus.FINISHED,
+                                                                            decision,
+                                                                            tradeResult,
+                                                                            profit);
+        botHandler.sendMessage(Long.valueOf(user.getUserId()), sellHistory.sellDescription());
     }
 
     KimchiTradeProfit calculateProfit(TradeResult tradeResult, KimchiTradeHistory buyHistory, BigDecimal usdPriceKrw) {
