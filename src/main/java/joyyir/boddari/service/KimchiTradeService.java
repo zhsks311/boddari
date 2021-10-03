@@ -68,7 +68,7 @@ public class KimchiTradeService {
             if (lastHistory.getStatus() == KimchiTradeStatus.WAITING) {
                 checkBuyTimingAndTrade(user, tradeStrategy, lastHistory.getTradeId(), botHandler);
             } else if (lastHistory.getStatus() == KimchiTradeStatus.STARTED) {
-                checkSellTimingAndTrade(user, tradeStrategy, lastHistory, tradeHistory, botHandler);
+                checkSellTimingAndTrade(user, tradeStrategy, lastHistory, botHandler);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -93,7 +93,7 @@ public class KimchiTradeService {
         KimchiTradeHistory buyHistory = tradeHistoryService.saveNewHistory(user.getUserId(),
                                                                            tradeId,
                                                                            KimchiTradeStatus.STARTED,
-                                                                           decision,
+                                                                           decision.getCurrencyType(),
                                                                            tradeResult,
                                                                            null);
         botHandler.sendMessage(Long.valueOf(user.getUserId()), buyHistory.buyDescription());
@@ -101,35 +101,28 @@ public class KimchiTradeService {
 
     private void checkSellTimingAndTrade(KimchiTradeUser user,
                                          TradeStrategy tradeStrategy,
-                                         KimchiTradeHistory lastHistory,
-                                         List<KimchiTradeHistory> tradeHistory,
+                                         KimchiTradeHistory buyHistory,
                                          BoddariBotHandler botHandler) {
-        TradeDecision decision = tradeStrategy.decideSell(lastHistory);
+        TradeDecision decision = tradeStrategy.decideSell(buyHistory);
         if (decision.isTrade()) {
 //            log.info("[jyjang] 조건이 충족되어 김프 거래를 마무리합니다. {}", decision);
-            tradeSell(decision, user, tradeHistory, lastHistory, botHandler);
+            tradeSell(user, buyHistory, botHandler);
         }
     }
 
-    private void tradeSell(TradeDecision decision,
-                           KimchiTradeUser user,
-                           List<KimchiTradeHistory> tradeHistory,
-                           KimchiTradeHistory lastHistory,
-                           BoddariBotHandler botHandler) {
-        String tradeId = lastHistory.getTradeId();
-        TradeResult tradeResult = kimchiTradeSell(decision.getCurrencyType(),
-                                                  lastHistory.getBuyQuantity(),
-                                                  lastHistory.getShortQuantity(),
+    public void tradeSell(KimchiTradeUser user,
+                          KimchiTradeHistory buyHistory,
+                          BoddariBotHandler botHandler) {
+        String tradeId = buyHistory.getTradeId();
+        TradeResult tradeResult = kimchiTradeSell(buyHistory.getCurrencyType(),
+                                                  buyHistory.getBuyQuantity(),
+                                                  buyHistory.getShortQuantity(),
                                                   user);
-        KimchiTradeHistory buyHistory = tradeHistory.stream()
-                                                    .filter(x -> x.getStatus() == KimchiTradeStatus.STARTED)
-                                                    .findFirst()
-                                                    .orElse(null);
         KimchiTradeProfit profit = calculateProfit(tradeResult, buyHistory, usdPriceRepository.getUsdPriceKrw());
         KimchiTradeHistory sellHistory = tradeHistoryService.saveNewHistory(user.getUserId(),
                                                                             tradeId,
                                                                             KimchiTradeStatus.FINISHED,
-                                                                            decision,
+                                                                            buyHistory.getCurrencyType(),
                                                                             tradeResult,
                                                                             profit);
         botHandler.sendMessage(Long.valueOf(user.getUserId()), sellHistory.sellDescription());

@@ -1,11 +1,11 @@
 package joyyir.boddari.service;
 
+import joyyir.boddari.domain.exchange.CurrencyType;
 import joyyir.boddari.domain.kimchi.KimchiPremiumData;
 import joyyir.boddari.domain.kimchi.KimchiTradeHistory;
 import joyyir.boddari.domain.kimchi.KimchiTradeHistoryRepository;
 import joyyir.boddari.domain.kimchi.KimchiTradeProfit;
 import joyyir.boddari.domain.kimchi.KimchiTradeStatus;
-import joyyir.boddari.domain.kimchi.TradeDecision;
 import joyyir.boddari.domain.kimchi.TradeResult;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,13 +28,13 @@ public class KimchiTradeHistoryService {
         return kimchiTradeHistoryRepository.save(new KimchiTradeHistory(null, userId, tradeId, LocalDateTime.now(), status, null, null));
     }
 
-    public KimchiTradeHistory saveNewHistory(String userId, String tradeId, KimchiTradeStatus status, TradeDecision decision, TradeResult tradeResult, KimchiTradeProfit profit) {
+    public KimchiTradeHistory saveNewHistory(String userId, String tradeId, KimchiTradeStatus status, CurrencyType currencyType, TradeResult tradeResult, KimchiTradeProfit profit) {
         return kimchiTradeHistoryRepository.save(new KimchiTradeHistory(null,
                                                                         userId,
                                                                         tradeId,
                                                                         LocalDateTime.now(),
                                                                         status,
-                                                                        decision.getCurrencyType(),
+                                                                        currencyType,
                                                                         tradeResult.getKimchiPremium().doubleValue(),
                                                                         tradeResult.getBuyOrderDetail().getOrderQty(),
                                                                         tradeResult.getBuyOrderDetail().getAveragePrice(),

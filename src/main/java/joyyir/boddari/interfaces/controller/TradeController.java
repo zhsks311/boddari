@@ -10,6 +10,7 @@ import joyyir.boddari.interfaces.exception.BadRequestException;
 import joyyir.boddari.interfaces.handler.BoddariBotHandler;
 import joyyir.boddari.service.KimchiPremiumService;
 import joyyir.boddari.service.KimchiTradeHistoryService;
+import joyyir.boddari.service.KimchiTradeService;
 import joyyir.boddari.service.KimchiTradeUserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ public class TradeController implements TelegramCommandController {
     private final KimchiTradeUserService userService;
     private final KimchiTradeHistoryService tradeHistoryService;
     private final KimchiPremiumService kimchiPremiumService;
+    private final KimchiTradeService kimchiTradeService;
 
     @Override
     public void runCommand(Long chatId, String[] commands, BoddariBotHandler botHandler) throws BadRequestException {
@@ -42,6 +44,7 @@ public class TradeController implements TelegramCommandController {
                 "/trade stop : 현재 트레이딩 종료\n" +
                 "/trade pause : 현재 트레이딩 일시 중지\n" +
                 "/trade resume : 일시 중지된 트레이딩 재개\n" +
+                "/trade cancel : 업비트에서 매수한 자산을 다시 매도하고, 바이낸스에서 숏한 자산을 다시 롱한 뒤, 트레이딩 종료\n" +
                 "/trade status : 현재 진행 중인 트레이딩 상태 확인\n" +
                 "/trade history : 최근 n일 동안 진행된 트레이드 히스토리 확인 (예시) /trade history 5";
             botHandler.sendMessage(chatId, helpMessage);
@@ -59,6 +62,9 @@ public class TradeController implements TelegramCommandController {
                 break;
             case "pause":
                 pause(botHandler, chatId, userId);
+                break;
+            case "cancel":
+                cancel(botHandler, chatId, userId);
                 break;
             case "status":
                 status(botHandler, chatId, userId);
@@ -112,6 +118,25 @@ public class TradeController implements TelegramCommandController {
             throw new BadRequestException("pause 명령은 START 상태일 때만 할 수 있습니다. 현재 상태: " + user.getTradeStatus());
         }
         KimchiTradeUser savedUser = userService.setUserTradeStatus(user, targetStatus, user.getCurrentTradeId());
+        notifyTradeStatusChange(botHandler, chatId, savedUser);
+    }
+
+    private void cancel(BoddariBotHandler botHandler, Long chatId, String userId) throws BadRequestException {
+        TradeStatus targetStatus = TradeStatus.STOP;
+        KimchiTradeUser user = findUser(userId, targetStatus);
+        if (user.getTradeStatus() != TradeStatus.START && user.getTradeStatus() != TradeStatus.PAUSE) {
+            throw new BadRequestException("cancel 명령은 START, PAUSE 상태일 때만 할 수 있습니다. 현재 상태: " + user.getTradeStatus());
+        }
+        List<KimchiTradeHistory> tradeHistory = tradeHistoryService.findTradeHistory(userId, user.getCurrentTradeId());
+        KimchiTradeHistory buyHistory = tradeHistory.stream()
+                                                    .filter(x -> x.getStatus() == KimchiTradeStatus.STARTED)
+                                                    .findFirst()
+                                                    .orElse(null);
+        if (buyHistory == null) {
+            throw new BadRequestException("cancel 명령은 업비트 현물 매수 및 바이낸스 선물 숏이 진행된 경우에만 가능합니다.");
+        }
+        kimchiTradeService.tradeSell(user, buyHistory, botHandler);
+        KimchiTradeUser savedUser = userService.setUserTradeStatus(user, targetStatus, null);
         notifyTradeStatusChange(botHandler, chatId, savedUser);
     }
 

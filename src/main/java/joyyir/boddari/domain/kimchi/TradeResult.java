@@ -16,6 +16,10 @@ public class TradeResult {
 
     public BigDecimal getKimchiPremium() {
         return buyOrderDetail.getAveragePrice()
-                             .divide(shortOrderDetail.getAveragePrice().multiply(usdPriceKrw), 2, RoundingMode.HALF_UP);
+                             .divide(shortOrderDetail.getAveragePrice()
+                                                     .multiply(usdPriceKrw), 8, RoundingMode.HALF_UP)
+                             .subtract(new BigDecimal(1))
+                             .multiply(new BigDecimal(100))
+                             .setScale(2, RoundingMode.HALF_UP);
     }
 }

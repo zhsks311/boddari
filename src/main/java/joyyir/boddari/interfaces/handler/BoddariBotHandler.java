@@ -118,6 +118,7 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
                 "/trade stop : 현재 트레이딩 종료\n" +
                 "/trade pause : 현재 트레이딩 일시 중지\n" +
                 "/trade resume : 일시 중지된 트레이딩 재개\n" +
+                "/trade cancel : 업비트에서 매수한 자산을 다시 매도하고, 바이낸스에서 숏한 자산을 다시 롱한 뒤, 트레이딩 종료\n" +
                 "/trade status : 현재 진행 중인 트레이딩 상태 확인\n" +
                 "/trade history : 최근 n일 동안 진행된 트레이드 히스토리 확인 (예시) /trade history 5\n" +
                 "/graph : 최근 7일 김프 그래프 확인\n" +
