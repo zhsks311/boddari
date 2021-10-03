@@ -6,15 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.math.BigDecimal;
-
 @Data
 @AllArgsConstructor
 public class TradeDecision {
     private CurrencyType currencyType;
     private PlaceType placeType;
     private boolean trade;
-    private BigDecimal kimchiPremium;
 
     @Override
     public String toString() {
@@ -22,7 +19,6 @@ public class TradeDecision {
             .append("currencyType", currencyType)
             .append("placeType", placeType)
             .append("trade", trade)
-            .append("kimchiPremium", kimchiPremium)
             .toString();
     }
 }

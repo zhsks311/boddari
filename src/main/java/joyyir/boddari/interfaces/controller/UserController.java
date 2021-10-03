@@ -134,12 +134,16 @@ public class UserController implements TelegramCommandController {
                                                   "\n" +
                                                   "1. 하한선, 상한선 기반 매매\n" +
                                                   "아래 예시처럼 설정하면 김프가 2.5% 이하일 경우 매수하고 5.0% 이상일 경우 매도합니다. /graph 명령으로 최근 김프 추이를 살펴본 뒤 적절한 값으로 설정하세요.\n" +
-                                                  "(예시) /user set trade-strategy lower-and-upper-limit|2.5|5.0");
+                                                  "(예시) /user set trade-strategy lower-and-upper-limit|2.5|5.0" +
+                                                  "\n\n" +
+                                                  "2. 하한선, 목표 수익률 기반 매매\n" +
+                                                  "아래 예시처럼 설정하면 김프가 2.5% 이하로 떨어지면 매수하고, 이후 이익률이 목표 이익률인 1.0% 이상이 되면 매도합니다. /graph 명령으로 최근 김프 추이를 살펴본 뒤 적절한 값으로 설정하세요.\n" +
+                                                  "(예시) /user set trade-strategy lower-and-profit-limit|2.5|1.0");
             }
             TradeStrategy tradeStrategy = tradeStrategyFactory.create(commands[3]);
             user.setTradeStrategy(commands[3]);
             KimchiTradeUser savedUser = userService.save(user);
-            botHandler.sendMessage(chatId, "트레이딩 전략이 변경되었습니다. " + tradeStrategy.getDescription());
+            botHandler.sendMessage(chatId, "트레이딩 전략이 변경되었습니다.\n" + tradeStrategy.getDescription());
         } catch (TradeStrategyFactoryException e) {
             throw new BadRequestException(e.getMessage());
         }

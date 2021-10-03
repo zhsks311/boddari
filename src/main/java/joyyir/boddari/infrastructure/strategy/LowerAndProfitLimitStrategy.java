@@ -7,17 +7,19 @@ import joyyir.boddari.domain.kimchi.KimchiTradeHistory;
 import joyyir.boddari.domain.kimchi.TradeDecision;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategy;
 import joyyir.boddari.service.KimchiPremiumService;
+import joyyir.boddari.service.KimchiTradeHistoryService;
 import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @AllArgsConstructor
-public class LowerAndUpperLimitStrategy implements TradeStrategy {
+public class LowerAndProfitLimitStrategy implements TradeStrategy {
     private final static List<CurrencyType> TARGET_CURRENCIES = List.of(CurrencyType.BTC, CurrencyType.ETH, CurrencyType.XRP, CurrencyType.ETC);
     private final KimchiPremiumService kimchiPremiumService;
+    private final KimchiTradeHistoryService kimchiTradeHistoryService;
     private final BigDecimal lowerLimit;
-    private final BigDecimal upperLimit;
+    private final BigDecimal profitLimit;
 
     @Override
     public TradeDecision decideBuy() {
@@ -36,7 +38,8 @@ public class LowerAndUpperLimitStrategy implements TradeStrategy {
     public TradeDecision decideSell(KimchiTradeHistory lastHistory) {
         CurrencyType currencyType = lastHistory.getCurrencyType();
         KimchiPremiumData kimchiPremium = kimchiPremiumService.getKimchiPremium(currencyType);
-        if (kimchiPremium == null || kimchiPremium.getKimchiPremium().doubleValue() < upperLimit.doubleValue()) {
+        BigDecimal profitRate = kimchiTradeHistoryService.getProfitRate(lastHistory, kimchiPremium);
+        if (profitRate.doubleValue() < profitLimit.doubleValue()) {
             return new TradeDecision(null, null, false);
         }
         return new TradeDecision(currencyType, PlaceType.SELL, true);
@@ -44,6 +47,6 @@ public class LowerAndUpperLimitStrategy implements TradeStrategy {
 
     @Override
     public String getDescription() {
-        return String.format("하한 김프 %.2f%% 밑으로 떨어지면 매수하고 상한 김프 %.2f%% 위로 올라가면 매도합니다.", lowerLimit.doubleValue(), upperLimit.doubleValue());
+        return String.format("김프가 %.2f%% 이하로 떨어지면 매수하고, 이후 이익률이 목표 이익률인 %.2f%% 이상이 되면 매도합니다.", lowerLimit.doubleValue(), profitLimit.doubleValue());
     }
 }
