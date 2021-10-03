@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @AllArgsConstructor
-public class UpperAndLowerLimitStrategy implements TradeStrategy {
+public class LowerAndUpperLimitStrategy implements TradeStrategy {
     private final static List<CurrencyType> TARGET_CURRENCIES = List.of(CurrencyType.BTC, CurrencyType.ETH, CurrencyType.XRP, CurrencyType.ETC);
     private final KimchiPremiumService kimchiPremiumService;
     private final BigDecimal lowerLimit;
