@@ -12,7 +12,6 @@ public enum CurrencyType {
     ATOM(MarketType.ATOM_USDT, MarketType.ATOM_KRW),
     SRM(MarketType.SRM_USDT, MarketType.SRM_KRW),
     DOT(MarketType.DOT_USDT, MarketType.DOT_KRW),
-    MANA(MarketType.MANA_USDT, MarketType.MANA_KRW)
     ;
 
     private final MarketType usdtMarket;

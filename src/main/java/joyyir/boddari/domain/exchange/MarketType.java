@@ -9,6 +9,5 @@ public enum MarketType {
     XTZ_KRW, XTZ_USDT,
     ATOM_KRW, ATOM_USDT,
     SRM_KRW, SRM_USDT,
-    DOT_KRW, DOT_USDT,
-    MANA_KRW, MANA_USDT
+    DOT_KRW, DOT_USDT
 }

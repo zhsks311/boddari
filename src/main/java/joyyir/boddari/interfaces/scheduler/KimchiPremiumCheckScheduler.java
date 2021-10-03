@@ -37,8 +37,7 @@ public class KimchiPremiumCheckScheduler {
                   CurrencyType.XTZ,
                   CurrencyType.ATOM,
                   CurrencyType.SRM,
-                  CurrencyType.DOT,
-                  CurrencyType.MANA);
+                  CurrencyType.DOT);
     private final KimchiPremiumService kimchiPremiumService;
     private final KimchiPremiumRepository kimchiPremiumRepository;
     private final RestTemplate restTemplate;
