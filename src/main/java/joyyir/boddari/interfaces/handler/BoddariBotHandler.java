@@ -125,7 +125,8 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
                 "/trade history : 최근 n일 동안 진행된 트레이드 히스토리 확인 (예시) /trade history 5\n" +
                 "/graph : 최근 7일 김프 그래프 확인\n" +
                 "\n" +
-                "문의 사항은 Telegram @joyyir2로 문의 주세요.\n" +
+                "해당 봇의 사용으로 인해 발생하는 손해는 개발자가 책임지지 않습니다.\n" +
+                "문의 사항 및 개선 요구 사항은 Telegram @joyyir2로 문의 부탁드립니다.\n" +
                 "";
         sendMessage(chatId, message);
     }
