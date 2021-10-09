@@ -21,6 +21,7 @@ import joyyir.boddari.domain.kimchi.strategy.TradeStrategyFactory;
 import joyyir.boddari.interfaces.handler.BoddariBotHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -182,12 +183,13 @@ public class KimchiTradeService {
         if (!isSuccessChangeMarginType) {
             throw new RuntimeException("마진 타입을 '격리'로 변경하는데 실패했습니다. 바이낸스 앱에서 확인하세요.");
         }
+        Integer leverage = ObjectUtils.firstNonNull(user.getLeverage(), 1);
         boolean isSuccessChangeLeverage = binanceFutureTradeRepository.changeInitialLeverage(binanceMarket,
-                                                                                             1,
+                                                                                             leverage,
                                                                                              user.getBinanceAccessKey(),
                                                                                              user.getBinanceSecretKey());
         if (!isSuccessChangeLeverage) {
-            throw new RuntimeException("레버리지를 1배로 변경하는데 실패했습니다. 바이낸스 앱에서 확인하세요.");
+            throw new RuntimeException("레버리지를 " + leverage + "배로 변경하는데 실패했습니다. 바이낸스 앱에서 확인하세요.");
         }
         String binanceOrderId = binanceFutureTradeRepository.marketShort(binanceMarket, orderQuantity, user.getBinanceAccessKey(), user.getBinanceSecretKey());
         OrderDetail binanceOrderDetail = null;

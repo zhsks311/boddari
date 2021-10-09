@@ -47,11 +47,19 @@ public class BalanceService {
         BigDecimal binanceKrwAvailBalance = binanceUsdtAvailBalance.multiply(usdPriceKrw).setScale(0, RoundingMode.FLOOR);
         String errorMessage = "";
         if (upbitKrwAvailBalance.longValue() < krwLimit) {
-            errorMessage += "업비트 KRW 잔고가 부족합니다.\n설정된 금액 limit: " + krwLimit + "원, 업비트 이용 가능한 KRW 잔고: " + upbitKrwAvailBalance.longValue();
+            errorMessage += "업비트 KRW 잔고가 부족합니다.\n" +
+                "설정된 금액 limit: " + krwLimit + "원" +
+                ", 업비트 이용 가능한 KRW 잔고: " + upbitKrwAvailBalance.longValue();
             errorMessage += "\n\n";
         }
-        if (binanceKrwAvailBalance.longValue() < krwLimit) {
-            errorMessage += "바이낸스 USDT 잔고 부족합니다.\n설정된 금액 limit: " + krwLimit + "원, 바이낸스 이용 가능한 USDT 잔고: " + binanceUsdtAvailBalance + "달러 (약 " + binanceKrwAvailBalance + "원)";
+        Integer leverage = user.getLeverage();
+        int binanceKrwNeededBalance = krwLimit / leverage;
+        if (binanceKrwAvailBalance.longValue() < binanceKrwNeededBalance) {
+            errorMessage += "바이낸스 USDT 잔고 부족합니다.\n" +
+                "설정된 금액 limit: " + krwLimit + "원" +
+                ", 레버리지: " + leverage + "배" +
+                ", 필요한 USDT: " + new BigDecimal(binanceKrwNeededBalance).divide(usdPriceKrw, 4, RoundingMode.UP) + "달러 (약 " + binanceKrwNeededBalance + "원)" +
+                ", 바이낸스 이용 가능한 USDT 잔고: " + binanceUsdtAvailBalance + "달러 (약 " + binanceKrwAvailBalance + "원)";
         }
         if (errorMessage.length() > 0) {
             throw new BadRequestException(errorMessage);

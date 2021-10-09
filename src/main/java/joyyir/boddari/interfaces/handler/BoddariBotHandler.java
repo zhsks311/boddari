@@ -114,6 +114,7 @@ public class BoddariBotHandler extends TelegramLongPollingBot {
                 "/user info : 유저 정보 조회\n" +
                 "/user set krw-limit {금액} : 김프 거래를 위한 업비트 KRW 금액 변경\n" +
                 "/user set trade-strategy {설정값} : 김프 트레이딩 전략 설정\n" +
+                "/user set leverage {배수} : 바이낸스 선물 숏 거래 시에 레버리지 설정\n" +
                 "/trade start : 새로운 트레이딩 시작\n" +
                 "/trade stop : 현재 트레이딩 종료\n" +
                 "/trade pause : 현재 트레이딩 일시 중지\n" +

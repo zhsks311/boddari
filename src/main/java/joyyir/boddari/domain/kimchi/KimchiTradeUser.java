@@ -35,6 +35,8 @@ public class KimchiTradeUser {
 
     private String binanceSecretKey;
 
+    private Integer leverage;
+
     public KimchiTradeUser() {
     }
 
@@ -46,7 +48,8 @@ public class KimchiTradeUser {
                            String upbitAccessKey,
                            String upbitSecretKey,
                            String binanceAccessKey,
-                           String binanceSecretKey) {
+                           String binanceSecretKey,
+                           Integer leverage) {
         this.userId = userId;
         this.currentTradeId = currentTradeId;
         this.tradeStatus = tradeStatus;
@@ -56,6 +59,7 @@ public class KimchiTradeUser {
         this.upbitSecretKey = upbitSecretKey;
         this.binanceAccessKey = binanceAccessKey;
         this.binanceSecretKey = binanceSecretKey;
+        this.leverage = leverage;
     }
 
     @Override
@@ -66,6 +70,7 @@ public class KimchiTradeUser {
             .append("tradeStatus", tradeStatus)
             .append("krwLimit", krwLimit)
             .append("tradeStrategy", tradeStrategy)
+            .append("leverage", leverage)
             .toString();
     }
 }

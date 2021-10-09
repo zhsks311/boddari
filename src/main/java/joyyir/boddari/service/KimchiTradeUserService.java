@@ -44,7 +44,7 @@ public class KimchiTradeUserService {
 
     public KimchiTradeUser register(String userId, String upbitAccessKey, String upbitSecretKey, String binanceAccessKey, String binanceSecretKey) {
         // TODO : jyjang - upbit key, binance key test
-        return kimchiTradeUserRepository.save(new KimchiTradeUser(userId, null, TradeStatus.STOP, null, null, upbitAccessKey, upbitSecretKey, binanceAccessKey, binanceSecretKey));
+        return kimchiTradeUserRepository.save(new KimchiTradeUser(userId, null, TradeStatus.STOP, null, null, upbitAccessKey, upbitSecretKey, binanceAccessKey, binanceSecretKey, 1));
     }
 
     @Transactional

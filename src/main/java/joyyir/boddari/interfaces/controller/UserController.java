@@ -1,5 +1,6 @@
 package joyyir.boddari.interfaces.controller;
 
+import joyyir.boddari.domain.exchange.FutureTradeRepository;
 import joyyir.boddari.domain.kimchi.KimchiTradeUser;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategy;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategyFactory;
@@ -22,6 +23,7 @@ public class UserController implements TelegramCommandController {
     private final KimchiTradeUserService userService;
     private final TradeStrategyFactory tradeStrategyFactory;
     private final BalanceService balanceService;
+    private final FutureTradeRepository binanceFutureTradeRepository;
 
     @Override
     public void runCommand(Long chatId, String[] commands, BoddariBotHandler botHandler) throws BadRequestException {
@@ -32,7 +34,8 @@ public class UserController implements TelegramCommandController {
                 "/user unregister : 유저 정보 제거\n" +
                 "/user info : 유저 정보 조회\n" +
                 "/user set krw-limit {금액} : 김프 거래를 위한 업비트 KRW 금액 변경\n" +
-                "/user set trade-strategy {설정값} : 김프 트레이딩 전략 설정";
+                "/user set trade-strategy {설정값} : 김프 트레이딩 전략 설정\n" +
+                "/user set leverage {배수} : 바이낸스 선물 숏 거래 시에 레버리지 설정";
             botHandler.sendMessage(chatId, helpMessage);
             return;
         }
@@ -48,7 +51,8 @@ public class UserController implements TelegramCommandController {
                 break;
             case "set":
                 String helpMessage = "/user set krw-limit {금액} : 김프 거래를 위한 업비트 KRW 금액 변경\n" +
-                                     "/user set trade-strategy {설정값} : 김프 트레이딩 전략 설정";
+                                     "/user set trade-strategy {설정값} : 김프 트레이딩 전략 설정\n" +
+                                     "/user set leverage {배수} : 바이낸스 선물 숏 거래 시에 레버리지 설정";
                 if (commands.length == 2) {
                     botHandler.sendMessage(chatId, helpMessage);
                     return;
@@ -59,6 +63,9 @@ public class UserController implements TelegramCommandController {
                         break;
                     case "trade-strategy":
                         setTradeStrategy(chatId, userId, commands, botHandler);
+                        break;
+                    case "leverage":
+                        setLeverage(chatId, userId, commands, botHandler);
                         break;
                     default:
                         throw new BadRequestException("지원하지 않는 명령어입니다.\n" + helpMessage);
@@ -147,5 +154,19 @@ public class UserController implements TelegramCommandController {
         } catch (TradeStrategyFactoryException e) {
             throw new BadRequestException(e.getMessage());
         }
+    }
+
+    private void setLeverage(Long chatId, String userId, String[] commands, BoddariBotHandler botHandler) throws BadRequestException {
+        KimchiTradeUser user = userService.findUserById(userId);
+        if (user == null) {
+            throw new BadRequestException("등록되지 않은 유저입니다.");
+        }
+        if (commands.length != 4 || NumberUtils.toInt(commands[3], 0) <= 0) {
+            throw new BadRequestException("레버리지는 자연수로 설정해주세요. (예시) /user set leverage 2");
+        }
+        int leverage = NumberUtils.toInt(commands[3], 1);
+        user.setLeverage(leverage);
+        userService.save(user);
+        botHandler.sendMessage(chatId, "레버리지가 " + leverage + "배로 설정되었습니다.");
     }
 }
