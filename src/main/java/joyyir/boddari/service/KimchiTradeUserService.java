@@ -26,6 +26,10 @@ public class KimchiTradeUserService {
                                         .orElse(null);
     }
 
+    public List<KimchiTradeUser> findAll() {
+        return kimchiTradeUserRepository.findAll();
+    }
+
     public List<KimchiTradeUser> findAllByTradeStatus(TradeStatus tradeStatus) {
         return kimchiTradeUserRepository.findAllByTradeStatus(tradeStatus);
     }

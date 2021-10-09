@@ -1,6 +1,5 @@
 package joyyir.boddari.interfaces.controller;
 
-import joyyir.boddari.domain.exchange.FutureTradeRepository;
 import joyyir.boddari.domain.kimchi.KimchiTradeUser;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategy;
 import joyyir.boddari.domain.kimchi.strategy.TradeStrategyFactory;
@@ -23,7 +22,6 @@ public class UserController implements TelegramCommandController {
     private final KimchiTradeUserService userService;
     private final TradeStrategyFactory tradeStrategyFactory;
     private final BalanceService balanceService;
-    private final FutureTradeRepository binanceFutureTradeRepository;
 
     @Override
     public void runCommand(Long chatId, String[] commands, BoddariBotHandler botHandler) throws BadRequestException {
